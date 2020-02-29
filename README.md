@@ -12,3 +12,10 @@ For full details see: http://ag-grid.com/nodejs-server-side-operations/
 - run `yarn install`
 - start with `yarn start`
 - open browser at `localhost:4000`
+
+## GO Pre requested
+- Install `go get github.com/githubnemo/CompileDaemon`
+- Install `go get golang.org/x/lint/golint`
+
+### Run Go
+- `make lint`
