@@ -4,7 +4,7 @@ import 'ag-grid-enterprise';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
 
-var cacheBlockSize = 2;
+var cacheBlockSize = 100;
 
 const gridOptions = {
 
@@ -14,8 +14,8 @@ const gridOptions = {
         {field: 'athlete'},
         {field: 'country', hide: true},
         {field: 'sport', hide: true},
-        // {field: 'country', rowGroup: true, hide: true},
-        // {field: 'sport', rowGroup: true, hide: true},
+        {field: 'country', rowGroup: true, hide: true},
+        {field: 'sport', rowGroup: true, hide: true},
         {field: 'year', filter: 'number', filterParams: {newRowsAction: 'keep'}},
         {field: 'gold', aggFunc: 'sum'},
         {field: 'silver', aggFunc: 'sum'},
@@ -32,9 +32,9 @@ const gridOptions = {
     // debug: true,
     cacheBlockSize: cacheBlockSize,
     // maxBlocksInCache: cacheBlockSize,
-    // purgeClosedRowNodes: true,
-    // maxConcurrentDatasourceRequests: 2,
-    // blockLoadDebounceMillis: 1000
+    purgeClosedRowNodes: true,
+    maxConcurrentDatasourceRequests: 2,
+    blockLoadDebounceMillis: 1000
 };
 
 function onPageSizeChanged() {
