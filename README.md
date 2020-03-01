@@ -1,10 +1,13 @@
-# ag-Grid Server-Side Node.js Example
+# ag-Grid Server-Side 
+> Node.js Example
 
-A reference implementation showing how to perform server-side operations using ag-Grid with node.js and MySQL.
+> Go Example
+
+A reference implementation showing how to perform server-side operations using ag-Grid with api server node.js, go and MySQL.
 
 ![](https://github.com/ag-grid/ag-grid/blob/latest/packages/ag-grid-docs/src/nodejs-server-side-operations/app-arch.png "")
 
-For full details see: http://ag-grid.com/nodejs-server-side-operations/
+Reff: for full details see: http://ag-grid.com/nodejs-server-side-operations/
 
 ## Usage
 
