@@ -21,4 +21,4 @@ Reff: for full details see: http://ag-grid.com/nodejs-server-side-operations/
 - Install `go get golang.org/x/lint/golint`
 
 ### Run Go
-- `make lint`
+- `make gorun`
