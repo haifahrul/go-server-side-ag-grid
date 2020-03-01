@@ -3,7 +3,8 @@
 echo "Start linting========"
 CompileDaemon -build="echo true" \
     -color="true" \
-    -command="golint ./internal/..."
+    -command="golint ./cmd/... " \
+    -command="go run ./cmd/..."
 
 echo ""
 echo "End Linting********"

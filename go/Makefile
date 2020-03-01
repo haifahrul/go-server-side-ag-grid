@@ -1,2 +1,2 @@
-lint:
+gorun:
 	@sh ./scripts/lint.sh
