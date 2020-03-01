@@ -12,7 +12,7 @@ const gridOptions = {
 
     columnDefs: [
         {field: 'athlete'},
-        {field: 'country', hide: true},
+        {field: 'country', hide: true,filter: 'text'},
         {field: 'sport', hide: true},
         {field: 'country', rowGroup: true, hide: true},
         {field: 'sport', rowGroup: true, hide: true},

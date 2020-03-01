@@ -27,7 +27,7 @@ type Model struct {
 	Total         int64   `json:"total"`
 }
 
-// RequestAgGrid struct
+// RequestAgGrid struct for Ag Grid
 type RequestAgGrid struct {
 	StartRow     int64                    `json:"startRow"`
 	EndRow       int64                    `json:"endRow"`
@@ -38,6 +38,12 @@ type RequestAgGrid struct {
 	GroupKeys    []map[string]interface{} `json:"groupKeys"`
 	FilterModel  interface{}              `json:"filterModel"`
 	SortModel    []map[string]interface{} `json:"sortModel"`
+}
+
+// ResponseAgGrid struct for Ag Grid
+type ResponseAgGrid struct {
+	LastRow int64   `json:"lastRow"`
+	Rows    []Model `json:"rows"`
 }
 
 // DBConn connection
@@ -129,7 +135,17 @@ func List2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		result, err := json.Marshal(rows)
+		response := ResponseAgGrid{
+			LastRow: 10,
+			Rows:    rows,
+		}
+
+		// rowCount := getRowCount(req, rows)
+		// log.Println(rowCount)
+		// resultsForPage := cutResultsToPageSize(req, rows)
+		// log.Println(resultsForPage)
+
+		result, err := json.Marshal(response)
 		if err != nil {
 			fmt.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -265,12 +281,13 @@ func createWhereSQL(r RequestAgGrid) (q string) {
 	}
 
 	// TODO: filterModel
-	// if (filterModel) {
-	// 	keySet := Object.keys(filterModel);
-	// 	keySet.forEach(function (key) {
-	// 		item := filterModel[key];
-	// 		whereParts.push(createFilterSQL(key, item));
-	// 	});
+	// if filterModel {
+	// 	log.Println(filterModel)
+	// keySet := Object.keys(filterModel);
+	// keySet.forEach(function (key) {
+	// 	item := filterModel[key];
+	// 	whereParts.push(createFilterSQL(key, item));
+	// });
 	// }
 
 	if len(whereParts) > 0 {
@@ -353,12 +370,13 @@ func createLimitSQL(r RequestAgGrid) (q string) {
 	return fmt.Sprintf("LIMIT %v OFFSET %v", (pageSize + 1), startRow)
 }
 
-func getRowCount(r RequestAgGrid, results interface{}) (q int64) {
-	if results == nil || results.(string) == "" || len(results.([]map[string]interface{})) == 0 {
+func getRowCount(r RequestAgGrid, results []Model) (q int64) {
+	resultsLength := len(results)
+
+	if len(results) == 0 {
 		return 0
 	}
 
-	resultsLength := len(results.([]map[string]interface{}))
 	currentLastRow := r.StartRow + int64(resultsLength)
 
 	// return currentLastRow <= r.EndRow ? currentLastRow : -1;
@@ -368,15 +386,13 @@ func getRowCount(r RequestAgGrid, results interface{}) (q int64) {
 	return -1
 }
 
-func cutResultsToPageSize(r RequestAgGrid, results interface{}) (q interface{}) {
+func cutResultsToPageSize(r RequestAgGrid, results []Model) (q interface{}) {
 	pageSize := r.EndRow - r.StartRow
+	resultsLength := len(results)
 
-	if results != nil {
-		resultsLength := len(results.([]map[string]interface{}))
-		if int64(resultsLength) > pageSize {
-			// TODO: convert this to go
-			// return results.splice(0, pageSize)
-		}
+	if resultsLength != 0 && int64(resultsLength) > pageSize {
+		// TODO: convert this to go
+		// return results.splice(0, pageSize)
 	}
 	return results
 }
