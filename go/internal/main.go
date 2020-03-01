@@ -205,16 +205,16 @@ func createTextFilterSQL(key string, item map[string]interface{}) (q string) {
 	switch item["type"] {
 	case "equals":
 		return fmt.Sprintf(`%s = "%s"`, key, item["filter"])
-	// case "notEqual":
-	// 	return key + ' != "' + item[".filter"] + '"';
-	// case "contains":
-	// 	return key + ' like "%' + item[".filter"] + '%"';
-	// case "notContains":
-	// 	return key + ' not like "%' + item[".filter"] + '%"';
-	// case "startsWith":
-	// 	return key + ' like "' + item[".filter"] + '%"';
-	// case "endsWith":
-	// 	return key + ' like "%' + item[".filter"] + '"';
+	case "notEqual":
+		return fmt.Sprintf(`%s != "%s"`, key, item["filter"])
+	case "contains":
+		return fmt.Sprintf(`%s LIKE "%%s%"`, key, item["filter"])
+	case "notContains":
+		return fmt.Sprintf(`%s NOT LIKE "%%s%"`, key, item["filter"])
+	case "startsWith":
+		return fmt.Sprintf(`%s LIKE "%s%"`, key, item["filter"])
+	case "endsWith":
+		return fmt.Sprintf(`%s LIKE "%%s"`, key, item["filter"])
 	default:
 		log.Println("unknown text filter type: %s", item["type"])
 		return "true"
@@ -225,19 +225,18 @@ func createNumberFilterSQL(key string, item map[string]interface{}) (q string) {
 	switch item["type"] {
 	case "equals":
 		return fmt.Sprintf(`%s = %v`, key, item["filter"])
-		// return key + ' = ' + item.filter;
-	// case "notEqual":
-	// 	return key + ' != ' + item.filter;
-	// case "greaterThan":
-	// 	return key + ' > ' + item.filter;
-	// case "greaterThanOrEqual":
-	// 	return key + ' >= ' + item.filter;
-	// case "lessThan":
-	// 	return key + ' < ' + item.filter;
-	// case "lessThanOrEqual":
-	// 	return key + ' <= ' + item.filter;
-	// case "inRange":
-	// 	return '(' + key + ' >= ' + item.filter + ' and ' + key + ' <= ' + item.filterTo + ')';
+	case "notEqual":
+		return fmt.Sprintf(`%s != %v`, key, item["filter"])
+	case "greaterThan":
+		return fmt.Sprintf(`%s > %v`, key, item["filter"])
+	case "greaterThanOrEqual":
+		return fmt.Sprintf(`%s >= %v`, key, item["filter"])
+	case "lessThan":
+		return fmt.Sprintf(`%s < %v`, key, item["filter"])
+	case "lessThanOrEqual":
+		return fmt.Sprintf(`%s <= %v`, key, item["filter"])
+	case "inRange":
+		return fmt.Sprintf(`(%s >= %v AND %s <= %v)`, key, item["filter"], key, item["filterTo"])
 	default:
 		log.Println("unknown number filter type: %s", item["type"])
 		return "true"
