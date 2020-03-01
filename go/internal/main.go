@@ -29,8 +29,8 @@ type Model struct {
 
 // RequestAgGrid struct
 type RequestAgGrid struct {
-	StartRow     int32                    `json:"startRow"`
-	EndRow       int32                    `json:"endRow"`
+	StartRow     int64                    `json:"startRow"`
+	EndRow       int64                    `json:"endRow"`
 	RowGroupCols []map[string]interface{} `json:"rowGroupCols"`
 	ValueCols    []map[string]interface{} `json:"valueCols"`
 	PivotCols    []map[string]interface{} `json:"pivotCols"`
@@ -181,95 +181,110 @@ func createSelectSQL(r RequestAgGrid) (q string) {
 		for i, v := range colsToSelect {
 			strs[i] = v.(string)
 		}
-		q := strings.Join(strs, ", ")
+		part := strings.Join(strs, ", ")
 
-		return fmt.Sprintf("SELECT %s", q)
+		return fmt.Sprintf("SELECT %s", part)
 	}
 
 	return "SELECT *"
 }
 
-// createFilterSql(key, item) {
-// 	switch (item.filterType) {
-// 		case 'text':
-// 			return this.createTextFilterSql(key, item);
-// 		case 'number':
-// 			return this.createNumberFilterSql(key, item);
-// 		default:
-// 			console.log('unkonwn filter type: ' + item.filterType);
-// 	}
-// }
+func createFilterSQL(key string, item map[string]interface{}) (q string) {
+	switch item["filterType"] {
+	case "text":
+		return createTextFilterSQL(key, item)
+	case "number":
+		return createNumberFilterSQL(key, item)
+	default:
+		log.Println("unkonwn filter type: %s", item["filterType"])
+		return ""
+	}
+}
 
-// createNumberFilterSql(key, item) {
-// 	switch (item.type) {
-// 		case 'equals':
-// 			return key + ' = ' + item.filter;
-// 		case 'notEqual':
-// 			return key + ' != ' + item.filter;
-// 		case 'greaterThan':
-// 			return key + ' > ' + item.filter;
-// 		case 'greaterThanOrEqual':
-// 			return key + ' >= ' + item.filter;
-// 		case 'lessThan':
-// 			return key + ' < ' + item.filter;
-// 		case 'lessThanOrEqual':
-// 			return key + ' <= ' + item.filter;
-// 		case 'inRange':
-// 			return '(' + key + ' >= ' + item.filter + ' and ' + key + ' <= ' + item.filterTo + ')';
-// 		default:
-// 			console.log('unknown number filter type: ' + item.type);
-// 			return 'true';
-// 	}
-// }
+func createTextFilterSQL(key string, item map[string]interface{}) (q string) {
+	switch item["type"] {
+	case "equals":
+		return fmt.Sprintf(`%s = "%s"`, key, item["filter"])
+	// case "notEqual":
+	// 	return key + ' != "' + item[".filter"] + '"';
+	// case "contains":
+	// 	return key + ' like "%' + item[".filter"] + '%"';
+	// case "notContains":
+	// 	return key + ' not like "%' + item[".filter"] + '%"';
+	// case "startsWith":
+	// 	return key + ' like "' + item[".filter"] + '%"';
+	// case "endsWith":
+	// 	return key + ' like "%' + item[".filter"] + '"';
+	default:
+		log.Println("unknown text filter type: %s", item["type"])
+		return "true"
+	}
+}
 
-// createTextFilterSql(key, item) {
-// 	switch (item.type) {
-// 		case 'equals':
-// 			return key + ' = "' + item.filter + '"';
-// 		case 'notEqual':
-// 			return key + ' != "' + item.filter + '"';
-// 		case 'contains':
-// 			return key + ' like "%' + item.filter + '%"';
-// 		case 'notContains':
-// 			return key + ' not like "%' + item.filter + '%"';
-// 		case 'startsWith':
-// 			return key + ' like "' + item.filter + '%"';
-// 		case 'endsWith':
-// 			return key + ' like "%' + item.filter + '"';
-// 		default:
-// 			console.log('unknown text filter type: ' + item.type);
-// 			return 'true';
-// 	}
-// }
+func createNumberFilterSQL(key string, item map[string]interface{}) (q string) {
+	switch item["type"] {
+	case "equals":
+		return fmt.Sprintf(`%s = %v`, key, item["filter"])
+		// return key + ' = ' + item.filter;
+	// case "notEqual":
+	// 	return key + ' != ' + item.filter;
+	// case "greaterThan":
+	// 	return key + ' > ' + item.filter;
+	// case "greaterThanOrEqual":
+	// 	return key + ' >= ' + item.filter;
+	// case "lessThan":
+	// 	return key + ' < ' + item.filter;
+	// case "lessThanOrEqual":
+	// 	return key + ' <= ' + item.filter;
+	// case "inRange":
+	// 	return '(' + key + ' >= ' + item.filter + ' and ' + key + ' <= ' + item.filterTo + ')';
+	default:
+		log.Println("unknown number filter type: %s", item["type"])
+		return "true"
+	}
+}
 
 func createWhereSQL(r RequestAgGrid) (q string) {
-	// 	const rowGroupCols = request.rowGroupCols;
-	// 	const groupKeys = request.groupKeys;
-	// 	const filterModel = request.filterModel;
+	rowGroupCols := r.RowGroupCols
+	groupKeys := r.GroupKeys
+	// TODO: filterModel
+	// filterModel := r.FilterModel
 
-	// 	const that = this;
-	// 	const whereParts = [];
+	// that := this
+	whereParts := make([]interface{}, 0)
 
-	// 	if (groupKeys.length > 0) {
-	// 		groupKeys.forEach(function (key, index) {
-	// 			const colName = rowGroupCols[index].field;
-	// 			whereParts.push(colName + ' = "' + key + '"')
-	// 		});
+	if len(groupKeys) > 0 {
+		for k, v := range groupKeys {
+			colName := rowGroupCols[k]["field"]
+			part := fmt.Sprintf(`%s = "%s"`, colName, v)
+			whereParts = append(whereParts, part)
+		}
+		// groupKeys.forEach(function (key, index) {
+		// 	colName := rowGroupCols[index].field;
+		// 	whereParts.push(colName + ' = "' + key + '"')
+		// });
+	}
+
+	// TODO: filterModel
+	// if (filterModel) {
+	// 	keySet := Object.keys(filterModel);
+	// 	keySet.forEach(function (key) {
+	// 		item := filterModel[key];
+	// 		whereParts.push(createFilterSQL(key, item));
+	// 	});
 	// }
 
-	// 	if (filterModel) {
-	// 		const keySet = Object.keys(filterModel);
-	// 		keySet.forEach(function (key) {
-	// 			const item = filterModel[key];
-	// 			whereParts.push(that.createFilterSql(key, item));
-	// 		});
-	// 	}
+	if len(whereParts) > 0 {
+		strs := make([]string, len(whereParts))
+		for i, v := range whereParts {
+			strs[i] = v.(string)
+		}
+		part := strings.Join(strs, " AND ")
 
-	// 	if (whereParts.length > 0) {
-	// 		return ' where ' + whereParts.join(' and ');
-	// 	} else {
+		return fmt.Sprintf(" WHERE %s ", part)
+	}
+
 	return ""
-	// 	}
 }
 
 func createGroupBySQL(r RequestAgGrid) (q string) {
@@ -278,12 +293,16 @@ func createGroupBySQL(r RequestAgGrid) (q string) {
 
 	isDoingGrouping := isDoingGrouping(rowGroupCols, groupKeys)
 	if isDoingGrouping {
-		// colsToGroupBy := []map[string]interface{};
+		colsToGroupBy := make([]interface{}, 0)
+		rowGroupCol := rowGroupCols[len(groupKeys)]
+		colsToGroupBy = append(colsToGroupBy, rowGroupCol["field"])
 
-		// rowGroupCol := rowGroupCols[groupKeys.length];
-		// colsToGroupBy.push(rowGroupCol.field);
-
-		// return " group by " + colsToGroupBy.join(", ");
+		strs := make([]string, len(colsToGroupBy))
+		for i, v := range colsToGroupBy {
+			strs[i] = v.(string)
+		}
+		part := strings.Join(strs, ", ")
+		return fmt.Sprintf(` GROUP BY %s`, part)
 	}
 
 	// select all columns
@@ -325,7 +344,6 @@ func isDoingGrouping(rowGroupCols []map[string]interface{}, groupKeys []map[stri
 	// if we are grouping by more columns than we have keys for (that means the user
 	// has not expanded a lowest level group, OR we are not grouping at all).
 	return len(rowGroupCols) > len(groupKeys)
-	// return rowGroupCols.length > groupKeys.length;
 }
 
 func createLimitSQL(r RequestAgGrid) (q string) {
@@ -336,19 +354,30 @@ func createLimitSQL(r RequestAgGrid) (q string) {
 	return fmt.Sprintf("LIMIT %v OFFSET %v", (pageSize + 1), startRow)
 }
 
-// getRowCount(request, results) {
-// 	if (results === null || results === undefined || results.length === 0) {
-// 		return null;
-// 	}
-// 	const currentLastRow = request.startRow + results.length;
-// 	return currentLastRow <= request.endRow ? currentLastRow : -1;
-// }
+func getRowCount(r RequestAgGrid, results interface{}) (q int64) {
+	if results == nil || results.(string) == "" || len(results.([]map[string]interface{})) == 0 {
+		return 0
+	}
 
-// cutResultsToPageSize(request, results) {
-// 	const pageSize = request.endRow - request.startRow;
-// 	if (results && results.length > pageSize) {
-// 		return results.splice(0, pageSize);
-// 	} else {
-// 		return results;
-// 	}
-// }
+	resultsLength := len(results.([]map[string]interface{}))
+	currentLastRow := r.StartRow + int64(resultsLength)
+
+	// return currentLastRow <= r.EndRow ? currentLastRow : -1;
+	if currentLastRow <= r.EndRow {
+		return currentLastRow
+	}
+	return -1
+}
+
+func cutResultsToPageSize(r RequestAgGrid, results interface{}) (q interface{}) {
+	pageSize := r.EndRow - r.StartRow
+
+	if results != nil {
+		resultsLength := len(results.([]map[string]interface{}))
+		if int64(resultsLength) > pageSize {
+			// TODO: convert this to go
+			// return results.splice(0, pageSize)
+		}
+	}
+	return results
+}
