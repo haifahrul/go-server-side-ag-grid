@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/haifahrul/go-server-side-ag-grid/go/internal"
 )
 
 // Model struct
@@ -29,14 +29,7 @@ type Model struct {
 var db *sqlx.DB
 
 func main() {
-	db, err := ConnectSqlx()
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer db.Close()
-
-	http.HandleFunc("/olympic-winners", OlympicWinners.FindAll)
+	http.HandleFunc("/olympic-winners", List)
 
 	fmt.Println("starting web server at http://localhost:8080/")
 	http.ListenAndServe(":8080", nil)
@@ -50,6 +43,43 @@ func ConnectSqlx() (*sqlx.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+
+// List get
+func List(w http.ResponseWriter, r *http.Request) {
+    if r.Method == "GET" {
+		var rows []Model
+		var err error
+
+		db, err = ConnectSqlx()
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		defer db.Close()
+
+		w.Header().Set("Content-Type", "application/json")
+
+		qryStr := `SELECT total FROM olympic_winners LIMIT 1`
+		err = db.Select(&rows, qryStr)
+		if err != nil {
+			fmt.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		result, err := json.Marshal(rows)
+		if err != nil {
+			fmt.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(result)
+		return
+    }
+
+    http.Error(w, "", http.StatusBadRequest)
 }
 
 // func buildSql(request) (q string, error) {
