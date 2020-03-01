@@ -60,7 +60,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 
-		qryStr := `SELECT total FROM olympic_winners LIMIT 1`
+		qryStr := `SELECT * FROM olympic_winners LIMIT 10`
 		err = db.Select(&rows, qryStr)
 		if err != nil {
 			fmt.Println(err.Error())

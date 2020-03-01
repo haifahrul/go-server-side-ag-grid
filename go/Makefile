@@ -1,2 +1,4 @@
+goget:
+	@sh ./scripts/go-get.sh
 gorun:
-	@sh ./scripts/lint.sh
+	@sh ./scripts/go-run.sh
