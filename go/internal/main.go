@@ -51,7 +51,6 @@ var db *sqlx.DB
 
 func main() {
 	http.HandleFunc("/olympic-winners", List)
-	http.HandleFunc("/olympic-winners-2", List2)
 
 	fmt.Println("starting web server at http://localhost:8080/")
 	http.ListenAndServe(":8080", nil)
@@ -67,46 +66,10 @@ func ConnectSqlx() (*sqlx.DB, error) {
 	return db, nil
 }
 
-// List with method get
+// List with method post
 func List(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		var rows []Model
-		var err error
-
-		db, err = ConnectSqlx()
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		defer db.Close()
-
-		w.Header().Set("Content-Type", "application/json")
-
-		qryStr := `SELECT * FROM olympic_winners LIMIT 10`
-		err = db.Select(&rows, qryStr)
-		if err != nil {
-			fmt.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		result, err := json.Marshal(rows)
-		if err != nil {
-			fmt.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Write(result)
-		return
-	}
-
-	http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-}
-
-// List2 with method post
-func List2(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
+		log.Println(r.Body)
 		var rows []Model
 		var err error
 		var req RequestAgGrid
@@ -114,6 +77,7 @@ func List2(w http.ResponseWriter, r *http.Request) {
 		err = json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			log.Println(err.Error())
+			return
 		}
 
 		db, err = ConnectSqlx()
@@ -124,6 +88,9 @@ func List2(w http.ResponseWriter, r *http.Request) {
 		defer db.Close()
 
 		w.Header().Set("Content-Type", "application/json")
+
+		log.Println(req.StartRow)
+		log.Println(req.EndRow)
 
 		// buildSQL
 		SQL := buildSQL(req, "olympic_winners")
@@ -135,15 +102,14 @@ func List2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		response := ResponseAgGrid{
-			LastRow: 10,
-			Rows:    rows,
-		}
-
-		// rowCount := getRowCount(req, rows)
-		// log.Println(rowCount)
+		rowCount := getRowCount(req, rows)
 		// resultsForPage := cutResultsToPageSize(req, rows)
 		// log.Println(resultsForPage)
+
+		response := ResponseAgGrid{
+			LastRow: rowCount,
+			Rows:    rows,
+		}
 
 		result, err := json.Marshal(response)
 		if err != nil {
@@ -274,10 +240,6 @@ func createWhereSQL(r RequestAgGrid) (q string) {
 			part := fmt.Sprintf(`%s = "%s"`, colName, v)
 			whereParts = append(whereParts, part)
 		}
-		// groupKeys.forEach(function (key, index) {
-		// 	colName := rowGroupCols[index].field;
-		// 	whereParts.push(colName + ' = "' + key + '"')
-		// });
 	}
 
 	// TODO: filterModel
@@ -325,6 +287,7 @@ func createGroupBySQL(r RequestAgGrid) (q string) {
 	return ""
 }
 
+// TODO:
 func createOrderBySQL(r RequestAgGrid) (q string) {
 	// 	const rowGroupCols = request.rowGroupCols;
 	// 	const groupKeys = request.groupKeys;
@@ -379,7 +342,6 @@ func getRowCount(r RequestAgGrid, results []Model) (q int64) {
 
 	currentLastRow := r.StartRow + int64(resultsLength)
 
-	// return currentLastRow <= r.EndRow ? currentLastRow : -1;
 	if currentLastRow <= r.EndRow {
 		return currentLastRow
 	}

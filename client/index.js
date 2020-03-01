@@ -4,7 +4,7 @@ import 'ag-grid-enterprise';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
 
-var cacheBlockSize = 100;
+var cacheBlockSize = 10;
 
 const gridOptions = {
 
@@ -14,8 +14,8 @@ const gridOptions = {
         {field: 'athlete'},
         {field: 'country', hide: true,filter: 'text'},
         {field: 'sport', hide: true},
-        {field: 'country', rowGroup: true, hide: true},
-        {field: 'sport', rowGroup: true, hide: true},
+        // {field: 'country', rowGroup: true, hide: true},
+        // {field: 'sport', rowGroup: true, hide: true},
         {field: 'year', filter: 'number', filterParams: {newRowsAction: 'keep'}},
         {field: 'gold', aggFunc: 'sum'},
         {field: 'silver', aggFunc: 'sum'},
@@ -54,20 +54,20 @@ onPageSizeChanged()
 
 const datasource = {
     getRows(params) {
-
-         fetch('./olympicWinners/', {
-             method: 'post',
-             body: JSON.stringify(params.request),
-             headers: {"Content-Type": "application/json; charset=utf-8"}
-         })
-         .then(httpResponse => httpResponse.json())
-         .then(response => {
-             params.successCallback(response.rows, response.lastRow);
-         })
-         .catch(error => {
-             console.error(error);
-             params.failCallback();
-         })
+        // fetch('./nodeOlympicWinners/', {
+        fetch('./goOlympicWinners/', {
+            method: 'post',
+            body: JSON.stringify(params.request),
+            headers: {"Content-Type": "application/json; charset=utf-8"}
+        })
+        .then(httpResponse => httpResponse.json())
+        .then(response => {
+            params.successCallback(response.rows, response.lastRow);
+        })
+        .catch(error => {
+            console.error(error);
+            params.failCallback();
+        })
     }
 };
 
