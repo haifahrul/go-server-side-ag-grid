@@ -1,10 +1,11 @@
 #!/bin/bash
 
 echo "Start Go Run ========"
-CompileDaemon -build="echo true" \
-    -color="true" \
-    -command="golint ./internal/... " \
-    -command="go run ./internal/... "
-
+CompileDaemon \
+    -color=true \
+    -graceful-kill=true \
+    -pattern="^(\.env.+|\.env)|(.+\.go|.+\.c)$" \
+    -build="go build -mod=vendor -o ./go-ag-grid ./internal/..." \
+    -command="./go-ag-grid"
 echo ""
 echo "End Go Run ********"
