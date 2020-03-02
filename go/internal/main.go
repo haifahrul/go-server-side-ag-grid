@@ -110,7 +110,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 		}
 
 		rowCount := getRowCount(req, rows)
-		log.Println(rowCount)
+		log.Println("rowCount : ", rowCount)
 		// resultsForPage := cutResultsToPageSize(req, rows)
 		// log.Println(resultsForPage)
 
@@ -380,7 +380,7 @@ func createLimitSQL(r RequestAgGrid) string {
 func getRowCount(r RequestAgGrid, rows []Model) int64 {
 	rowsLength := len(rows)
 
-	log.Println("getRowCount -> ", len(rows))
+	log.Println("getRowCount : ", len(rows))
 
 	if len(rows) == 0 {
 		return 0
