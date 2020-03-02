@@ -13,11 +13,11 @@ Reff: for full details see: http://ag-grid.com/nodejs-server-side-operations/
 
 - Clone the project
 - run `yarn install`
-- start with `yarn start` to run only angular
+- start with `yarn start`
 - open browser at `localhost:4000`
 
 If you want to start the angular and api node.js
-- start with `yarn dev` to run angular & node.js server
+- start with `yarn dev` to run angular & node.js server with nodemon
 
 ## GO Pre requested
 - Install `go get github.com/githubnemo/CompileDaemon`
