@@ -18,7 +18,8 @@ app.post('/nodeOlympicWinners', function (req, res) {
 });
 
 app.post('/goOlympicWinnersSQL', function (req, res) {
-    console.log(req.body)
+    console.log('---BODY---', req.body)
+    console.log('')
     fetch('http://localhost:8080/sql-olympic-winners', {
         method: 'post',
         body: JSON.stringify(req.body),

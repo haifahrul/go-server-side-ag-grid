@@ -72,7 +72,6 @@ func ConnectSqlx() (*sqlx.DB, error) {
 // List with method post
 func List(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		log.Println(r.Body)
 		var rows []Model
 		var err error
 		var req RequestAgGrid
@@ -135,9 +134,9 @@ func buildSQL(r RequestAgGrid, table string) (q string) {
 
 	SQL := fmt.Sprintf("%s %s %s %s %s %s", selectSQL, fromSQL, whereSQL, groupBySQL, orderBySQL, limitSQL)
 
-	log.Println("------ START QUERY BUILDER -----")
+	log.Println("\n\n------ START QUERY BUILDER -----")
 	log.Println(SQL)
-	log.Println("======= END QUERY BUILDER ======")
+	log.Println("======= END QUERY BUILDER ======\n")
 
 	return SQL
 }
@@ -288,35 +287,64 @@ func createGroupBySQL(r RequestAgGrid) (q string) {
 }
 
 // TODO:
-func createOrderBySQL(r RequestAgGrid) (q string) {
-	// 	const rowGroupCols = request.rowGroupCols;
-	// 	const groupKeys = request.groupKeys;
-	// 	const sortModel = request.sortModel;
+func createOrderBySQL(r RequestAgGrid) string {
+	rowGroupCols := r.RowGroupCols
+	groupKeys := r.GroupKeys
+	sortModel := r.SortModel
+	grouping := isDoingGrouping(rowGroupCols, groupKeys)
 
-	// 	const grouping = this.isDoingGrouping(rowGroupCols, groupKeys);
+	sortParts := make([]string, 0)
+	if len(sortModel) != 0 {
+		groupColIds := make([]string, 0)
+		for _, v := range rowGroupCols {
+			id := v["id"].(string)
+			groupColIds = append(groupColIds, id)
+			break
+		}
 
-	// 	const sortParts = [];
-	// 	if (sortModel) {
+		for _, v := range sortModel {
+			var groupColIdsIndexOf int
+			for ig, vg := range groupColIds {
+				if v["colId"] == vg {
+					groupColIdsIndexOf = ig
+					break
+				} else {
+					groupColIdsIndexOf = -1
+					break
+				}
+			}
 
-	// 		const groupColIds =
-	// 			rowGroupCols.map(groupCol => groupCol.id)
-	// 				.slice(0, groupKeys.length + 1);
+			log.Println(groupColIdsIndexOf)
 
-	// 		sortModel.forEach(function (item) {
-	// 			if (grouping && groupColIds.indexOf(item.colId) < 0) {
-	// 				// ignore
-	// 			} else {
-	// 				sortParts.push(item.colId + ' ' + item.sort);
-	// 			}
-	// 		});
-	// 	}
+			if grouping && groupColIdsIndexOf < 0 {
+				// ignore
+			} else {
+				part := fmt.Sprintf("%s %s", v["colId"], v["sort"])
+				sortParts = append(sortParts, part)
+			}
+		}
+	}
 
-	// 	if (sortParts.length > 0) {
-	// 		return ' order by ' + sortParts.join(', ');
-	// 	}
+	if len(sortParts) > 0 {
+		strs := make([]string, len(sortParts))
+		for i, v := range sortParts {
+			strs[i] = v
+		}
+		part := strings.Join(strs, ", ")
+		return fmt.Sprintf(` ORDER BY %s`, part)
+	}
 
 	return ""
 }
+
+// func indexOf(word string, data []map[string]interface{}) int {
+// 	for k, v := range data {
+// 		if word == v {
+// 			return k
+// 		}
+// 	}
+// 	return -1
+// }
 
 func isDoingGrouping(rowGroupCols []map[string]interface{}, groupKeys []string) bool {
 	// we are not doing grouping if at the lowest level. we are at the lowest level

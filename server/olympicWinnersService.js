@@ -181,6 +181,12 @@ class OlympicWinnersService {
             });
         }
 
+        console.log('rowGroupCols : ', rowGroupCols)
+        console.log('groupKeys : ', groupKeys)
+        console.log('sortModel : ', sortModel)
+        console.log('grouping : ', grouping)
+        console.log('sortParts : ', sortParts)
+
         if (sortParts.length > 0) {
             return ' order by ' + sortParts.join(', ');
         } else {

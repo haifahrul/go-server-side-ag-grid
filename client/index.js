@@ -11,15 +11,15 @@ const gridOptions = {
     rowModelType: 'serverSide',
 
     columnDefs: [
-        {field: 'athlete'},
+        {field: 'athlete', filter: 'text'},
         {field: 'country', hide: true,filter: 'text'},
         {field: 'sport', hide: true},
         {field: 'country', rowGroup: true, hide: true},
-        {field: 'sport', rowGroup: true, hide: true},
+        // {field: 'sport', rowGroup: true, hide: true},
         {field: 'year', filter: 'number', filterParams: {newRowsAction: 'keep'}},
-        {field: 'gold', aggFunc: 'sum'},
-        {field: 'silver', aggFunc: 'sum'},
-        {field: 'bronze', aggFunc: 'sum'},
+        // {field: 'gold', aggFunc: 'sum'},
+        // {field: 'silver', aggFunc: 'sum'},
+        // {field: 'bronze', aggFunc: 'sum'},
     ],
 
     defaultColDef: {
