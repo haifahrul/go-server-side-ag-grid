@@ -337,15 +337,6 @@ func createOrderBySQL(r RequestAgGrid) string {
 	return ""
 }
 
-// func indexOf(word string, data []map[string]interface{}) int {
-// 	for k, v := range data {
-// 		if word == v {
-// 			return k
-// 		}
-// 	}
-// 	return -1
-// }
-
 func isDoingGrouping(rowGroupCols []map[string]interface{}, groupKeys []string) bool {
 	// we are not doing grouping if at the lowest level. we are at the lowest level
 	// if we are grouping by more columns than we have keys for (that means the user
