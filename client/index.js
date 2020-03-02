@@ -91,7 +91,7 @@ const datasourceGo = {
             if (response.rows && response.rows.length > 0) {
                 params.successCallback(response.rows, response.lastRow);
             } else {
-                params.failCallback();
+                params.successCallback([], 0);
             }
         })
         .catch(error => {

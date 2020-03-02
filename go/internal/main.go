@@ -27,6 +27,14 @@ type Model struct {
 	Total         int64   `json:"total"`
 }
 
+// ColumnVO struct
+type ColumnVO struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName"`
+	Field       string `json:"field"`
+	AggFunc     string `json:"aggFunc"`
+}
+
 // RequestAgGrid struct for Ag Grid
 type RequestAgGrid struct {
 	StartRow     int64                    `json:"startRow"`
@@ -102,6 +110,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 		}
 
 		rowCount := getRowCount(req, rows)
+		log.Println(rowCount)
 		// resultsForPage := cutResultsToPageSize(req, rows)
 		// log.Println(resultsForPage)
 
@@ -360,7 +369,7 @@ func isDoingGrouping(rowGroupCols []map[string]interface{}, groupKeys []string) 
 	return len(rowGroupCols) > len(groupKeys)
 }
 
-func createLimitSQL(r RequestAgGrid) (q string) {
+func createLimitSQL(r RequestAgGrid) string {
 	startRow := r.StartRow
 	endRow := r.EndRow
 	pageSize := endRow - startRow
@@ -368,14 +377,16 @@ func createLimitSQL(r RequestAgGrid) (q string) {
 	return fmt.Sprintf("LIMIT %v OFFSET %v", (pageSize + 1), startRow)
 }
 
-func getRowCount(r RequestAgGrid, results []Model) (q int64) {
-	resultsLength := len(results)
+func getRowCount(r RequestAgGrid, rows []Model) int64 {
+	rowsLength := len(rows)
 
-	if len(results) == 0 {
+	log.Println("getRowCount -> ", len(rows))
+
+	if len(rows) == 0 {
 		return 0
 	}
 
-	currentLastRow := r.StartRow + int64(resultsLength)
+	currentLastRow := r.StartRow + int64(rowsLength)
 
 	if currentLastRow <= r.EndRow {
 		return currentLastRow
@@ -383,13 +394,13 @@ func getRowCount(r RequestAgGrid, results []Model) (q int64) {
 	return -1
 }
 
-func cutResultsToPageSize(r RequestAgGrid, results []Model) (q interface{}) {
+func cutResultsToPageSize(r RequestAgGrid, rows []Model) interface{} {
 	pageSize := r.EndRow - r.StartRow
-	resultsLength := len(results)
+	rowsLength := len(rows)
 
-	if resultsLength != 0 && int64(resultsLength) > pageSize {
+	if rowsLength != 0 && int64(rowsLength) > pageSize {
 		// TODO: convert this to go
-		// return results.splice(0, pageSize)
+		// return rows.splice(0, pageSize)
 	}
-	return results
+	return rows
 }
