@@ -11,10 +11,10 @@ const gridOptions = {
     rowModelType: 'serverSide',
 
     columnDefs: [
-        {field: 'athlete', filter: 'text'},
-        {field: 'country', hide: true,filter: 'text'},
-        {field: 'sport', hide: true},
-        {field: 'country', rowGroup: true, hide: true},
+        {field: 'athlete', filter: 'text', filterParams: {newRowsAction: 'keep'}},
+        {field: 'country', filter: 'text', filterParams: {newRowsAction: 'keep'}},
+        // {field: 'sport', hide: true},
+        // {field: 'country', rowGroup: true, hide: true},
         // {field: 'sport', rowGroup: true, hide: true},
         {field: 'year', filter: 'number', filterParams: {newRowsAction: 'keep'}},
         // {field: 'gold', aggFunc: 'sum'},
@@ -23,9 +23,14 @@ const gridOptions = {
     ],
 
     defaultColDef: {
-        sortable: true
+        filter: 'agSetColumnFilter',
+        sortable: true,
+        enableRowGroup: true
     },
-
+    sideBar: true,
+    rowDragManaged: true,
+    rowGroupPanelShow: 'always',
+    floatingFilter: true,
     pagination: true,
     paginationPageSize: cacheBlockSize,
 

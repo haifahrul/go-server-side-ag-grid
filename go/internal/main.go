@@ -36,7 +36,7 @@ type RequestAgGrid struct {
 	PivotCols    []map[string]interface{} `json:"pivotCols"`
 	PivotMode    bool                     `json:"pivotMode"`
 	GroupKeys    []string                 `json:"groupKeys"`
-	FilterModel  interface{}              `json:"filterModel"`
+	FilterModel  map[string]interface{}   `json:"filterModel"`
 	SortModel    []map[string]interface{} `json:"sortModel"`
 }
 
@@ -63,7 +63,7 @@ func main() {
 func ConnectSqlx() (*sqlx.DB, error) {
 	db, err := sqlx.Connect("mysql", "guest:guest@(127.0.0.1:3306)/sample_data")
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err.Error())
 		return nil, err
 	}
 	return db, nil
@@ -185,17 +185,17 @@ func createFilterSQL(key string, item map[string]interface{}) (q string) {
 func createTextFilterSQL(key string, item map[string]interface{}) (q string) {
 	switch item["type"] {
 	case "equals":
-		return fmt.Sprintf(`%s = "%s"`, key, item["filter"])
+		return fmt.Sprintf(`%s = "%s%s"`, key, "%", item["filter"])
 	case "notEqual":
-		return fmt.Sprintf(`%s != "%s"`, key, item["filter"])
+		return fmt.Sprintf(`%s != "%s%s"`, key, "%", item["filter"])
 	case "contains":
-		return fmt.Sprintf(`%s LIKE "%%s%"`, key, item["filter"])
+		return fmt.Sprintf(`%s LIKE '%s%s%s'`, key, "%", item["filter"], "%")
 	case "notContains":
-		return fmt.Sprintf(`%s NOT LIKE "%%s%"`, key, item["filter"])
+		return fmt.Sprintf(`%s NOT LIKE "%s%s%s"`, key, "%", item["filter"], "%")
 	case "startsWith":
-		return fmt.Sprintf(`%s LIKE "%s%"`, key, item["filter"])
+		return fmt.Sprintf(`%s LIKE "%s%s"`, key, item["filter"], "%")
 	case "endsWith":
-		return fmt.Sprintf(`%s LIKE "%%s"`, key, item["filter"])
+		return fmt.Sprintf(`%s LIKE "%s%s"`, key, "%", item["filter"])
 	default:
 		log.Println("unknown text filter type: %s", item["type"])
 		return "true"
@@ -227,11 +227,9 @@ func createNumberFilterSQL(key string, item map[string]interface{}) (q string) {
 func createWhereSQL(r RequestAgGrid) (q string) {
 	rowGroupCols := r.RowGroupCols
 	groupKeys := r.GroupKeys
-	// TODO: filterModel
-	// filterModel := r.FilterModel
+	filterModel := r.FilterModel
 
-	// that := this
-	whereParts := make([]interface{}, 0)
+	whereParts := make([]string, 0)
 
 	if len(groupKeys) > 0 {
 		for k, v := range groupKeys {
@@ -241,20 +239,40 @@ func createWhereSQL(r RequestAgGrid) (q string) {
 		}
 	}
 
-	// TODO: filterModel
-	// if filterModel {
-	// 	log.Println(filterModel)
-	// keySet := Object.keys(filterModel);
-	// keySet.forEach(function (key) {
-	// 	item := filterModel[key];
-	// 	whereParts.push(createFilterSQL(key, item));
-	// });
-	// }
+	if filterModel != nil {
+		for i, v := range filterModel {
+			inRange := v.(map[string]interface{})
+			operator := inRange["operator"]
+			if operator == "AND" || operator == "OR" {
+				partRange := make([]string, 0)
+				for i2, v2 := range inRange {
+					if i2 == "operator" {
+						continue
+					}
+
+					createFilterSQL := createFilterSQL(i, v2.(map[string]interface{}))
+					partRange = append(partRange, createFilterSQL)
+				}
+
+				strs := make([]string, 0)
+				for _, v3 := range partRange {
+					strs = append(strs, v3)
+				}
+				part := strings.Join(strs, fmt.Sprintf(" %s ", operator.(string)))
+
+				wherePartRange := fmt.Sprintf(" %s ", part)
+				whereParts = append(whereParts, wherePartRange)
+			} else {
+				createFilterSQL := createFilterSQL(i, v.(map[string]interface{}))
+				whereParts = append(whereParts, createFilterSQL)
+			}
+		}
+	}
 
 	if len(whereParts) > 0 {
 		strs := make([]string, len(whereParts))
 		for i, v := range whereParts {
-			strs[i] = v.(string)
+			strs[i] = v
 		}
 		part := strings.Join(strs, " AND ")
 
@@ -313,8 +331,6 @@ func createOrderBySQL(r RequestAgGrid) string {
 					break
 				}
 			}
-
-			log.Println(groupColIdsIndexOf)
 
 			if grouping && groupColIdsIndexOf < 0 {
 				// ignore
