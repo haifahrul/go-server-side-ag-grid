@@ -133,7 +133,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 }
 
-func buildSQL(r RequestAgGrid, table string) (q string) {
+func buildSQL(r RequestAgGrid, table string) string {
 	selectSQL := createSelectSQL(r)
 	fromSQL := fmt.Sprintf("FROM %s ", table)
 	whereSQL := createWhereSQL(r)
@@ -150,7 +150,7 @@ func buildSQL(r RequestAgGrid, table string) (q string) {
 	return SQL
 }
 
-func createSelectSQL(r RequestAgGrid) (q string) {
+func createSelectSQL(r RequestAgGrid) string {
 	rowGroupCols := r.RowGroupCols
 	valueCols := r.ValueCols
 	groupKeys := r.GroupKeys
@@ -179,7 +179,7 @@ func createSelectSQL(r RequestAgGrid) (q string) {
 	return "SELECT *"
 }
 
-func createFilterSQL(key string, item map[string]interface{}) (q string) {
+func createFilterSQL(key string, item map[string]interface{}) string {
 	switch item["filterType"] {
 	case "text":
 		return createTextFilterSQL(key, item)
@@ -191,7 +191,7 @@ func createFilterSQL(key string, item map[string]interface{}) (q string) {
 	}
 }
 
-func createTextFilterSQL(key string, item map[string]interface{}) (q string) {
+func createTextFilterSQL(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
 		return fmt.Sprintf(`%s = '%s'`, key, item["filter"])
@@ -211,7 +211,7 @@ func createTextFilterSQL(key string, item map[string]interface{}) (q string) {
 	}
 }
 
-func createNumberFilterSQL(key string, item map[string]interface{}) (q string) {
+func createNumberFilterSQL(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
 		return fmt.Sprintf(`%s = %v`, key, item["filter"])
@@ -233,7 +233,7 @@ func createNumberFilterSQL(key string, item map[string]interface{}) (q string) {
 	}
 }
 
-func createWhereSQL(r RequestAgGrid) (q string) {
+func createWhereSQL(r RequestAgGrid) string {
 	rowGroupCols := r.RowGroupCols
 	groupKeys := r.GroupKeys
 	filterModel := r.FilterModel
@@ -291,7 +291,7 @@ func createWhereSQL(r RequestAgGrid) (q string) {
 	return ""
 }
 
-func createGroupBySQL(r RequestAgGrid) (q string) {
+func createGroupBySQL(r RequestAgGrid) string {
 	rowGroupCols := r.RowGroupCols
 	groupKeys := r.GroupKeys
 

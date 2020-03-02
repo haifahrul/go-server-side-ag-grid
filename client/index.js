@@ -4,7 +4,7 @@ import 'ag-grid-enterprise';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
 
-var cacheBlockSize = 10;
+var defaultPage = 10;
 
 const gridOptions = {
 
@@ -20,6 +20,14 @@ const gridOptions = {
         // {field: 'gold', aggFunc: 'sum'},
         // {field: 'silver', aggFunc: 'sum'},
         // {field: 'bronze', aggFunc: 'sum'},
+
+        // {field: 'athlete'},
+        // {field: 'country', rowGroup: true, hide: true},
+        // {field: 'sport', rowGroup: true, hide: true},
+        // {field: 'year', filter: 'number', filterParams: {newRowsAction: 'keep'}},
+        // {field: 'gold', aggFunc: 'sum'},
+        // {field: 'silver', aggFunc: 'sum'},
+        // {field: 'bronze', aggFunc: 'sum'},
     ],
 
     defaultColDef: {
@@ -31,11 +39,11 @@ const gridOptions = {
     rowDragManaged: true,
     rowGroupPanelShow: 'always',
     floatingFilter: true,
-    pagination: true,
-    paginationPageSize: cacheBlockSize,
+    // pagination: true,
+    paginationPageSize: defaultPage,
 
     // debug: true,
-    cacheBlockSize: cacheBlockSize,
+    cacheBlockSize: 100,
     // maxBlocksInCache: cacheBlockSize,
     purgeClosedRowNodes: true,
     maxConcurrentDatasourceRequests: 2,
@@ -46,7 +54,7 @@ function onPageSizeChanged() {
     document.getElementById('page-size').addEventListener("change", function(e) {
         var value = document.getElementById('page-size').value;
         console.log(value);
-        cacheBlockSize = value;
+        // cacheBlockSize = value;
         gridOptions.api.paginationSetPageSize(Number(value));
         gridOptions.api.setServerSideDatasource(datasource);
     })
