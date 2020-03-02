@@ -50,7 +50,10 @@ type ResponseAgGrid struct {
 var db *sqlx.DB
 
 func main() {
-	http.HandleFunc("/sql-olympic-winners", List)
+	http.HandleFunc("/sql-olympic-winners", List) // Query For SQL
+
+	// TODO: using query Mongo
+	// http.HandleFunc("/mongo-olympic-winners", ListMongo) // Query For Mongo
 
 	fmt.Println("starting web server at http://localhost:8080/")
 	http.ListenAndServe(":8080", nil)
@@ -82,7 +85,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 		db, err = ConnectSqlx()
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			return
 		}
 		defer db.Close()
@@ -94,7 +97,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 		err = db.Select(&rows, SQL)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -110,7 +113,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 		result, err := json.Marshal(response)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
