@@ -35,7 +35,7 @@ type RequestAgGrid struct {
 	ValueCols    []map[string]interface{} `json:"valueCols"`
 	PivotCols    []map[string]interface{} `json:"pivotCols"`
 	PivotMode    bool                     `json:"pivotMode"`
-	GroupKeys    []map[string]interface{} `json:"groupKeys"`
+	GroupKeys    []string                 `json:"groupKeys"`
 	FilterModel  interface{}              `json:"filterModel"`
 	SortModel    []map[string]interface{} `json:"sortModel"`
 }
@@ -318,7 +318,7 @@ func createOrderBySQL(r RequestAgGrid) (q string) {
 	return ""
 }
 
-func isDoingGrouping(rowGroupCols []map[string]interface{}, groupKeys []map[string]interface{}) bool {
+func isDoingGrouping(rowGroupCols []map[string]interface{}, groupKeys []string) bool {
 	// we are not doing grouping if at the lowest level. we are at the lowest level
 	// if we are grouping by more columns than we have keys for (that means the user
 	// has not expanded a lowest level group, OR we are not grouping at all).
