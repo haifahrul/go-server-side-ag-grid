@@ -14,8 +14,8 @@ const gridOptions = {
         {field: 'athlete'},
         {field: 'country', hide: true,filter: 'text'},
         {field: 'sport', hide: true},
-        // {field: 'country', rowGroup: true, hide: true},
-        // {field: 'sport', rowGroup: true, hide: true},
+        {field: 'country', rowGroup: true, hide: true},
+        {field: 'sport', rowGroup: true, hide: true},
         {field: 'year', filter: 'number', filterParams: {newRowsAction: 'keep'}},
         {field: 'gold', aggFunc: 'sum'},
         {field: 'silver', aggFunc: 'sum'},
@@ -46,16 +46,14 @@ function onPageSizeChanged() {
         gridOptions.api.setServerSideDatasource(datasource);
     })
 }
-
-const gridDiv = document.querySelector('#myGrid');
-new Grid(gridDiv, gridOptions);
-
 onPageSizeChanged()
 
-const datasource = {
+// API NODE.js
+const gridDivNode = document.querySelector('#myGrid');
+new Grid(gridDivNode, gridOptions);
+const datasourceNode = {
     getRows(params) {
-        // fetch('./nodeOlympicWinners/', {
-        fetch('./goOlympicWinners/', {
+        fetch('./nodeOlympicWinners/', {
             method: 'post',
             body: JSON.stringify(params.request),
             headers: {"Content-Type": "application/json; charset=utf-8"}
@@ -70,5 +68,28 @@ const datasource = {
         })
     }
 };
+gridOptions.api.setServerSideDatasource(datasourceNode);
+// END API NODE.js
 
-gridOptions.api.setServerSideDatasource(datasource);
+// API Golang
+const gridDivGo = document.querySelector('#myGridGo');
+new Grid(gridDivGo, gridOptions);
+const datasourceGo = {
+    getRows(params) {
+        fetch('./goOlympicWinnersSQL/', {
+            method: 'post',
+            body: JSON.stringify(params.request),
+            headers: {"Content-Type": "application/json; charset=utf-8"}
+        })
+        .then(httpResponse => httpResponse.json())
+        .then(response => {
+            params.successCallback(response.rows, response.lastRow);
+        })
+        .catch(error => {
+            console.error(error);
+            params.failCallback();
+        })
+    }
+};
+gridOptions.api.setServerSideDatasource(datasourceGo);
+// API Golang
