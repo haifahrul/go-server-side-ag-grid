@@ -50,7 +50,7 @@ type ResponseAgGrid struct {
 var db *sqlx.DB
 
 func main() {
-	http.HandleFunc("/olympic-winners", List)
+	http.HandleFunc("/sql-olympic-winners", List)
 
 	fmt.Println("starting web server at http://localhost:8080/")
 	http.ListenAndServe(":8080", nil)
@@ -88,9 +88,6 @@ func List(w http.ResponseWriter, r *http.Request) {
 		defer db.Close()
 
 		w.Header().Set("Content-Type", "application/json")
-
-		log.Println(req.StartRow)
-		log.Println(req.EndRow)
 
 		// buildSQL
 		SQL := buildSQL(req, "olympic_winners")
