@@ -39,9 +39,9 @@ type ColumnVO struct {
 type RequestAgGrid struct {
 	StartRow     int64                    `json:"startRow"`
 	EndRow       int64                    `json:"endRow"`
-	RowGroupCols []map[string]interface{} `json:"rowGroupCols"`
-	ValueCols    []map[string]interface{} `json:"valueCols"`
-	PivotCols    []map[string]interface{} `json:"pivotCols"`
+	RowGroupCols []ColumnVO               `json:"rowGroupCols"`
+	ValueCols    []ColumnVO               `json:"valueCols"`
+	PivotCols    []ColumnVO               `json:"pivotCols"`
 	PivotMode    bool                     `json:"pivotMode"`
 	GroupKeys    []string                 `json:"groupKeys"`
 	FilterModel  map[string]interface{}   `json:"filterModel"`
@@ -160,10 +160,10 @@ func createSelectSQL(r RequestAgGrid) (q string) {
 		groupKeysLength := len(groupKeys)
 		rowGroupCol := rowGroupCols[groupKeysLength]
 		colsToSelect := make([]interface{}, 0)
-		colsToSelect = append(colsToSelect, rowGroupCol["field"])
+		colsToSelect = append(colsToSelect, rowGroupCol.Field)
 
 		for _, v := range valueCols {
-			s := fmt.Sprintf(`%s(%s) AS %s`, v["aggFunc"], v["field"], v["field"])
+			s := fmt.Sprintf(`%s(%s) AS %s`, v.AggFunc, v.Field, v.Field)
 			colsToSelect = append(colsToSelect, s)
 		}
 
@@ -242,7 +242,7 @@ func createWhereSQL(r RequestAgGrid) (q string) {
 
 	if len(groupKeys) > 0 {
 		for k, v := range groupKeys {
-			colName := rowGroupCols[k]["field"]
+			colName := rowGroupCols[k].Field
 			part := fmt.Sprintf(`%s = "%s"`, colName, v)
 			whereParts = append(whereParts, part)
 		}
@@ -299,7 +299,7 @@ func createGroupBySQL(r RequestAgGrid) (q string) {
 	if isDoingGrouping {
 		colsToGroupBy := make([]interface{}, 0)
 		rowGroupCol := rowGroupCols[len(groupKeys)]
-		colsToGroupBy = append(colsToGroupBy, rowGroupCol["field"])
+		colsToGroupBy = append(colsToGroupBy, rowGroupCol.Field)
 
 		strs := make([]string, len(colsToGroupBy))
 		for i, v := range colsToGroupBy {
@@ -324,7 +324,7 @@ func createOrderBySQL(r RequestAgGrid) string {
 	if len(sortModel) != 0 {
 		groupColIds := make([]string, 0)
 		for _, v := range rowGroupCols {
-			id := v["id"].(string)
+			id := v.ID
 			groupColIds = append(groupColIds, id)
 			break
 		}
@@ -362,11 +362,11 @@ func createOrderBySQL(r RequestAgGrid) string {
 	return ""
 }
 
-func isDoingGrouping(rowGroupCols []map[string]interface{}, groupKeys []string) bool {
+func isDoingGrouping(r []ColumnVO, g []string) bool {
 	// we are not doing grouping if at the lowest level. we are at the lowest level
 	// if we are grouping by more columns than we have keys for (that means the user
 	// has not expanded a lowest level group, OR we are not grouping at all).
-	return len(rowGroupCols) > len(groupKeys)
+	return len(r) > len(g)
 }
 
 func createLimitSQL(r RequestAgGrid) string {
