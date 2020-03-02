@@ -88,7 +88,11 @@ const datasourceGo = {
         })
         .then(httpResponse => httpResponse.json())
         .then(response => {
-            params.successCallback(response.rows, response.lastRow);
+            if (response.rows && response.rows.length > 0) {
+                params.successCallback(response.rows, response.lastRow);
+            } else {
+                params.failCallback();
+            }
         })
         .catch(error => {
             console.error(error);

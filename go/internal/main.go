@@ -185,17 +185,17 @@ func createFilterSQL(key string, item map[string]interface{}) (q string) {
 func createTextFilterSQL(key string, item map[string]interface{}) (q string) {
 	switch item["type"] {
 	case "equals":
-		return fmt.Sprintf(`%s = "%s%s"`, key, "%", item["filter"])
+		return fmt.Sprintf(`%s = '%s'`, key, item["filter"])
 	case "notEqual":
-		return fmt.Sprintf(`%s != "%s%s"`, key, "%", item["filter"])
+		return fmt.Sprintf(`%s != '%s'`, key, item["filter"])
 	case "contains":
 		return fmt.Sprintf(`%s LIKE '%s%s%s'`, key, "%", item["filter"], "%")
 	case "notContains":
-		return fmt.Sprintf(`%s NOT LIKE "%s%s%s"`, key, "%", item["filter"], "%")
+		return fmt.Sprintf(`%s NOT LIKE '%s%s%s'`, key, "%", item["filter"], "%")
 	case "startsWith":
-		return fmt.Sprintf(`%s LIKE "%s%s"`, key, item["filter"], "%")
+		return fmt.Sprintf(`%s LIKE '%s%s'`, key, item["filter"], "%")
 	case "endsWith":
-		return fmt.Sprintf(`%s LIKE "%s%s"`, key, "%", item["filter"])
+		return fmt.Sprintf(`%s LIKE '%s%s'`, key, "%", item["filter"])
 	default:
 		log.Println("unknown text filter type: %s", item["type"])
 		return "true"
