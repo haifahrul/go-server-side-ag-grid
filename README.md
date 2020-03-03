@@ -10,6 +10,10 @@ A reference implementation showing how to perform server-side operations using a
 
 Reff: for full details see: http://ag-grid.com/nodejs-server-side-operations/
 
+## Pre requested
+- copy file `.env-example` and rename to `.env`
+- setup your credential database such as username, password and etc
+
 ## Usage
 
 - Clone the project
@@ -25,6 +29,5 @@ If you want to start the angular and api node.js
 - Install `go get golang.org/x/lint/golint`
 
 ### Run Go with Makefile
-- `cd go`
 - `make goget` To run `go get & go mod vendor`
 - `make gorun` To run `go run main.go`
