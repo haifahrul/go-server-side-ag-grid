@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// MySQL struct
-type MySQL struct{}
+// mySQL struct
+type mySQL struct{}
 
 // ColumnVO struct
 type ColumnVO struct {
@@ -32,11 +32,12 @@ type RequestAgGrid struct {
 
 // ResponseAgGrid struct for Ag Grid
 type ResponseAgGrid struct {
-	LastRow int64   `json:"lastRow"`
-	Rows    []Model `json:"rows"`
+	LastRow int64         `json:"lastRow"`
+	Rows    []interface{} `json:"rows"`
 }
 
-func (*MySQL) buildSQL(r RequestAgGrid, table string) string {
+// BuildQuery for build query
+func (*mySQL) BuildQuery(r RequestAgGrid, table string) string {
 	selectSQL := createSelectSQL(r)
 	fromSQL := fmt.Sprintf("FROM %s ", table)
 	whereSQL := createWhereSQL(r)
@@ -48,7 +49,7 @@ func (*MySQL) buildSQL(r RequestAgGrid, table string) string {
 
 	log.Println("\n\n------ START QUERY BUILDER -----")
 	log.Println(SQL)
-	log.Println("======= END QUERY BUILDER ======\n")
+	log.Println("======= END QUERY BUILDER ======")
 
 	return SQL
 }
@@ -89,7 +90,7 @@ func createFilterSQL(key string, item map[string]interface{}) string {
 	case "number":
 		return createNumberFilterSQL(key, item)
 	default:
-		log.Println("unkonwn filter type: %s", item["filterType"])
+		log.Println("unkonwn filter type: ", item["filterType"])
 		return ""
 	}
 }
@@ -109,7 +110,7 @@ func createTextFilterSQL(key string, item map[string]interface{}) string {
 	case "endsWith":
 		return fmt.Sprintf(`%s LIKE '%s%s'`, key, "%", item["filter"])
 	default:
-		log.Println("unknown text filter type: %s", item["type"])
+		log.Println("unknown text filter type: ", item["type"])
 		return "true"
 	}
 }
@@ -131,7 +132,7 @@ func createNumberFilterSQL(key string, item map[string]interface{}) string {
 	case "inRange":
 		return fmt.Sprintf(`(%s >= %v AND %s <= %v)`, key, item["filter"], key, item["filterTo"])
 	default:
-		log.Println("unknown number filter type: %s", item["type"])
+		log.Println("unknown number filter type: ", item["type"])
 		return "true"
 	}
 }
@@ -216,7 +217,6 @@ func createGroupBySQL(r RequestAgGrid) string {
 	return ""
 }
 
-// TODO:
 func createOrderBySQL(r RequestAgGrid) string {
 	rowGroupCols := r.RowGroupCols
 	groupKeys := r.GroupKeys
@@ -280,7 +280,8 @@ func createLimitSQL(r RequestAgGrid) string {
 	return fmt.Sprintf("LIMIT %v OFFSET %v", (pageSize + 1), startRow)
 }
 
-func getRowCount(r RequestAgGrid, rows []Model) int64 {
+// GetRowCount for get row count
+func (*mySQL) GetRowCount(r RequestAgGrid, rows []interface{}) int64 {
 	rowsLength := len(rows)
 
 	log.Println("getRowCount : ", len(rows))
@@ -297,7 +298,8 @@ func getRowCount(r RequestAgGrid, rows []Model) int64 {
 	return -1
 }
 
-func cutResultsToPageSize(r RequestAgGrid, rows []Model) interface{} {
+// CutResultsToPageSize func
+func (*mySQL) CutResultsToPageSize(r RequestAgGrid, rows []interface{}) interface{} {
 	pageSize := r.EndRow - r.StartRow
 	rowsLength := len(rows)
 
@@ -308,5 +310,5 @@ func cutResultsToPageSize(r RequestAgGrid, rows []Model) interface{} {
 	return rows
 }
 
-// Get var
-var Get = &MySQL{}
+// MySQL var
+var MySQL = &mySQL{}

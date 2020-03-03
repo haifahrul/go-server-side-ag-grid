@@ -10,4 +10,5 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	golang.org/x/lint v0.0.0-20200130185559-910be7a94367 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
+	google.golang.org/grpc v1.27.1 // indirect
 )
