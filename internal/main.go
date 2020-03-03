@@ -80,6 +80,9 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 		// buildSQL
 		SQL := builder.MySQL.BuildQuery(req, "olympic_winners")
+		log.Println("\n\n------ START QUERY BUILDER -----")
+		log.Println(SQL)
+		log.Println("======= END QUERY BUILDER ======")
 
 		err = db.Select(&rows, SQL)
 		if err != nil {

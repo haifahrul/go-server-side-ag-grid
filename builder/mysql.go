@@ -47,10 +47,6 @@ func (*mySQL) BuildQuery(r RequestAgGrid, table string) string {
 
 	SQL := fmt.Sprintf("%s %s %s %s %s %s", selectSQL, fromSQL, whereSQL, groupBySQL, orderBySQL, limitSQL)
 
-	log.Println("\n\n------ START QUERY BUILDER -----")
-	log.Println(SQL)
-	log.Println("======= END QUERY BUILDER ======")
-
 	return SQL
 }
 
@@ -283,8 +279,6 @@ func createLimitSQL(r RequestAgGrid) string {
 // GetRowCount for get row count
 func (*mySQL) GetRowCount(r RequestAgGrid, rows []interface{}) int64 {
 	rowsLength := len(rows)
-
-	log.Println("getRowCount : ", len(rows))
 
 	if len(rows) == 0 {
 		return 0
