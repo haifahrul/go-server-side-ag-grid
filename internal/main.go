@@ -142,13 +142,13 @@ func ListMySQL(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// rowCount := builder.MySQL.GetRowCount(req, rw)
-		// log.Println("rowCount : ", rowCount)
+		rowsLength := len(rows)
+		rowCount := builder.MySQL.GetRowCount(req, rowsLength)
 		// resultsForPage := builder.MySQL.CutResultsToPageSize(req, rows)
 		// log.Println(resultsForPage)
 
 		response := ResponseAgGrid{
-			LastRow: 100,
+			LastRow: rowCount,
 			Rows:    rows,
 		}
 
@@ -182,7 +182,7 @@ func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		// buildSQL
-		SQL := builder.MySQL.BuildQuery(req, `"public"."olympic_winners"`)
+		SQL := builder.PostgreSQL.BuildQuery(req, `"public"."olympic_winners"`)
 		log.Println("\n\n======= POSTGRE SQL =======")
 		log.Println(SQL)
 		log.Println("======= END POSTGRE SQL ======")
@@ -194,13 +194,11 @@ func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// rowCount := builder.MySQL.GetRowCount(req, rw)
-		// log.Println("rowCount : ", rowCount)
-		// resultsForPage := builder.MySQL.CutResultsToPageSize(req, rows)
-		// log.Println(resultsForPage)
+		rowsLength := len(rows)
+		rowCount := builder.MySQL.GetRowCount(req, rowsLength)
 
 		response := ResponseAgGrid{
-			LastRow: 100,
+			LastRow: rowCount,
 			Rows:    rows,
 		}
 

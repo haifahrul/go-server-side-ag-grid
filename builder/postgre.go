@@ -67,17 +67,17 @@ func (*postgreSQL) createFilterSQL(key string, item map[string]interface{}) stri
 func (*postgreSQL) createTextFilterSQL(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
-		return fmt.Sprintf(`%s = '%s'`, key, item["filter"])
+		return fmt.Sprintf(`lower("%s") = '%s'`, key, item["filter"])
 	case "notEqual":
-		return fmt.Sprintf(`%s != '%s'`, key, item["filter"])
+		return fmt.Sprintf(`lower("%s") != '%s'`, key, item["filter"])
 	case "contains":
-		return fmt.Sprintf(`%s LIKE '%s%s%s'`, key, "%", item["filter"], "%")
+		return fmt.Sprintf(`lower("%s") LIKE '%s%s%s'`, key, "%", item["filter"], "%")
 	case "notContains":
-		return fmt.Sprintf(`%s NOT LIKE '%s%s%s'`, key, "%", item["filter"], "%")
+		return fmt.Sprintf(`lower("%s") NOT LIKE '%s%s%s'`, key, "%", item["filter"], "%")
 	case "startsWith":
-		return fmt.Sprintf(`%s LIKE '%s%s'`, key, item["filter"], "%")
+		return fmt.Sprintf(`lower("%s") LIKE '%s%s'`, key, item["filter"], "%")
 	case "endsWith":
-		return fmt.Sprintf(`%s LIKE '%s%s'`, key, "%", item["filter"])
+		return fmt.Sprintf(`lower("%s") LIKE '%s%s'`, key, "%", item["filter"])
 	default:
 		log.Println("unknown text filter type: ", item["type"])
 		return "true"
@@ -116,7 +116,7 @@ func (*postgreSQL) createWhereSQL(r RequestAgGrid) string {
 	if len(groupKeys) > 0 {
 		for k, v := range groupKeys {
 			colName := rowGroupCols[k].Field
-			part := fmt.Sprintf(`%s = "%s"`, colName, v)
+			part := fmt.Sprintf(`"%s" = '%s'`, colName, v)
 			whereParts = append(whereParts, part)
 		}
 	}
@@ -172,7 +172,8 @@ func (*postgreSQL) createGroupBySQL(r RequestAgGrid) string {
 	if isDoingGrouping {
 		colsToGroupBy := make([]interface{}, 0)
 		rowGroupCol := rowGroupCols[len(groupKeys)]
-		colsToGroupBy = append(colsToGroupBy, rowGroupCol.Field)
+		field := fmt.Sprintf(`"%s"`, rowGroupCol.Field)
+		colsToGroupBy = append(colsToGroupBy, field)
 
 		strs := make([]string, len(colsToGroupBy))
 		for i, v := range colsToGroupBy {
@@ -250,14 +251,12 @@ func (*postgreSQL) createLimitSQL(r RequestAgGrid) string {
 }
 
 // GetRowCount for get row count
-func (*postgreSQL) GetRowCount(r RequestAgGrid, rows []interface{}) int64 {
-	rowsLength := len(rows)
-
-	if len(rows) == 0 {
+func (*postgreSQL) GetRowCount(r RequestAgGrid, rows int) int64 {
+	if rows == 0 {
 		return 0
 	}
 
-	currentLastRow := r.StartRow + int64(rowsLength)
+	currentLastRow := r.StartRow + int64(rows)
 
 	if currentLastRow <= r.EndRow {
 		return currentLastRow

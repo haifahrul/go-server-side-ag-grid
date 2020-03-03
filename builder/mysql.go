@@ -250,14 +250,12 @@ func (*mySQL) createLimitSQL(r RequestAgGrid) string {
 }
 
 // GetRowCount for get row count
-func (*mySQL) GetRowCount(r RequestAgGrid, rows []interface{}) int64 {
-	rowsLength := len(rows)
-
-	if len(rows) == 0 {
+func (*mySQL) GetRowCount(r RequestAgGrid, rows int) int64 {
+	if rows == 0 {
 		return 0
 	}
 
-	currentLastRow := r.StartRow + int64(rowsLength)
+	currentLastRow := r.StartRow + int64(rows)
 
 	if currentLastRow <= r.EndRow {
 		return currentLastRow
