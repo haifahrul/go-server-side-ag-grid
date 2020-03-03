@@ -17,10 +17,10 @@ app.post('/nodeOlympicWinners', function (req, res) {
     });
 });
 
-app.post('/goOlympicWinnersSQL', function (req, res) {
+app.post('/goOlympicWinnersMySQL', function (req, res) {
     console.log('---BODY---', req.body)
     console.log('')
-    fetch('http://localhost:8080/sql-olympic-winners', {
+    fetch('http://localhost:8080/mysql-olympic-winners', {
         method: 'post',
         body: JSON.stringify(req.body),
         headers: {"Content-Type": "application/json; charset=utf-8;"}

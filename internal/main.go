@@ -58,7 +58,7 @@ type ResponseAgGrid struct {
 var db *sqlx.DB
 
 func main() {
-	http.HandleFunc("/sql-olympic-winners", List) // Query For SQL
+	http.HandleFunc("/mysql-olympic-winners", List) // Query For SQL
 
 	// TODO: using query Mongo
 	// http.HandleFunc("/mongo-olympic-winners", ListMongo) // Query For Mongo

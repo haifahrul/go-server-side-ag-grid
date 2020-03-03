@@ -89,7 +89,7 @@ const gridDivGo = document.querySelector('#myGridGo');
 new Grid(gridDivGo, gridOptions);
 const datasourceGo = {
     getRows(params) {
-        fetch('./goOlympicWinnersSQL/', {
+        fetch('./goOlympicWinnersMySQL/', {
             method: 'post',
             body: JSON.stringify(params.request),
             headers: {"Content-Type": "application/json; charset=utf-8"}
