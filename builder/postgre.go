@@ -6,29 +6,29 @@ import (
 	"strings"
 )
 
-// mySQL struct
-type mySQL struct{}
+// postgreSQL struct
+type postgreSQL struct{}
 
 // BuildQuery for build query
-func (*mySQL) BuildQuery(r RequestAgGrid, table string) string {
-	selectSQL := MySQL.createSelectSQL(r)
+func (*postgreSQL) BuildQuery(r RequestAgGrid, table string) string {
+	selectSQL := PostgreSQL.createSelectSQL(r)
 	fromSQL := fmt.Sprintf("FROM %s ", table)
-	whereSQL := MySQL.createWhereSQL(r)
-	limitSQL := MySQL.createLimitSQL(r)
-	orderBySQL := MySQL.createOrderBySQL(r)
-	groupBySQL := MySQL.createGroupBySQL(r)
+	whereSQL := PostgreSQL.createWhereSQL(r)
+	limitSQL := PostgreSQL.createLimitSQL(r)
+	orderBySQL := PostgreSQL.createOrderBySQL(r)
+	groupBySQL := PostgreSQL.createGroupBySQL(r)
 
 	SQL := fmt.Sprintf("%s %s %s %s %s %s", selectSQL, fromSQL, whereSQL, groupBySQL, orderBySQL, limitSQL)
 
 	return SQL
 }
 
-func (*mySQL) createSelectSQL(r RequestAgGrid) string {
+func (*postgreSQL) createSelectSQL(r RequestAgGrid) string {
 	rowGroupCols := r.RowGroupCols
 	valueCols := r.ValueCols
 	groupKeys := r.GroupKeys
 
-	isDoingGrouping := MySQL.isDoingGrouping(rowGroupCols, groupKeys)
+	isDoingGrouping := PostgreSQL.isDoingGrouping(rowGroupCols, groupKeys)
 	if isDoingGrouping {
 		groupKeysLength := len(groupKeys)
 		rowGroupCol := rowGroupCols[groupKeysLength]
@@ -52,19 +52,19 @@ func (*mySQL) createSelectSQL(r RequestAgGrid) string {
 	return "SELECT *"
 }
 
-func (*mySQL) createFilterSQL(key string, item map[string]interface{}) string {
+func (*postgreSQL) createFilterSQL(key string, item map[string]interface{}) string {
 	switch item["filterType"] {
 	case "text":
-		return MySQL.createTextFilterSQL(key, item)
+		return PostgreSQL.createTextFilterSQL(key, item)
 	case "number":
-		return MySQL.createNumberFilterSQL(key, item)
+		return PostgreSQL.createNumberFilterSQL(key, item)
 	default:
 		log.Println("unkonwn filter type: ", item["filterType"])
 		return ""
 	}
 }
 
-func (*mySQL) createTextFilterSQL(key string, item map[string]interface{}) string {
+func (*postgreSQL) createTextFilterSQL(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
 		return fmt.Sprintf(`%s = '%s'`, key, item["filter"])
@@ -84,7 +84,7 @@ func (*mySQL) createTextFilterSQL(key string, item map[string]interface{}) strin
 	}
 }
 
-func (*mySQL) createNumberFilterSQL(key string, item map[string]interface{}) string {
+func (*postgreSQL) createNumberFilterSQL(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
 		return fmt.Sprintf(`%s = %v`, key, item["filter"])
@@ -106,7 +106,7 @@ func (*mySQL) createNumberFilterSQL(key string, item map[string]interface{}) str
 	}
 }
 
-func (*mySQL) createWhereSQL(r RequestAgGrid) string {
+func (*postgreSQL) createWhereSQL(r RequestAgGrid) string {
 	rowGroupCols := r.RowGroupCols
 	groupKeys := r.GroupKeys
 	filterModel := r.FilterModel
@@ -132,7 +132,7 @@ func (*mySQL) createWhereSQL(r RequestAgGrid) string {
 						continue
 					}
 
-					createFilterSQL := MySQL.createFilterSQL(i, v2.(map[string]interface{}))
+					createFilterSQL := PostgreSQL.createFilterSQL(i, v2.(map[string]interface{}))
 					partRange = append(partRange, createFilterSQL)
 				}
 
@@ -145,7 +145,7 @@ func (*mySQL) createWhereSQL(r RequestAgGrid) string {
 				wherePartRange := fmt.Sprintf(" %s ", part)
 				whereParts = append(whereParts, wherePartRange)
 			} else {
-				createFilterSQL := MySQL.createFilterSQL(i, v.(map[string]interface{}))
+				createFilterSQL := PostgreSQL.createFilterSQL(i, v.(map[string]interface{}))
 				whereParts = append(whereParts, createFilterSQL)
 			}
 		}
@@ -164,11 +164,11 @@ func (*mySQL) createWhereSQL(r RequestAgGrid) string {
 	return ""
 }
 
-func (*mySQL) createGroupBySQL(r RequestAgGrid) string {
+func (*postgreSQL) createGroupBySQL(r RequestAgGrid) string {
 	rowGroupCols := r.RowGroupCols
 	groupKeys := r.GroupKeys
 
-	isDoingGrouping := MySQL.isDoingGrouping(rowGroupCols, groupKeys)
+	isDoingGrouping := PostgreSQL.isDoingGrouping(rowGroupCols, groupKeys)
 	if isDoingGrouping {
 		colsToGroupBy := make([]interface{}, 0)
 		rowGroupCol := rowGroupCols[len(groupKeys)]
@@ -186,11 +186,11 @@ func (*mySQL) createGroupBySQL(r RequestAgGrid) string {
 	return ""
 }
 
-func (*mySQL) createOrderBySQL(r RequestAgGrid) string {
+func (*postgreSQL) createOrderBySQL(r RequestAgGrid) string {
 	rowGroupCols := r.RowGroupCols
 	groupKeys := r.GroupKeys
 	sortModel := r.SortModel
-	grouping := MySQL.isDoingGrouping(rowGroupCols, groupKeys)
+	grouping := PostgreSQL.isDoingGrouping(rowGroupCols, groupKeys)
 
 	sortParts := make([]string, 0)
 	if len(sortModel) != 0 {
@@ -234,14 +234,14 @@ func (*mySQL) createOrderBySQL(r RequestAgGrid) string {
 	return ""
 }
 
-func (*mySQL) isDoingGrouping(r []ColumnVO, g []string) bool {
+func (*postgreSQL) isDoingGrouping(r []ColumnVO, g []string) bool {
 	// we are not doing grouping if at the lowest level. we are at the lowest level
 	// if we are grouping by more columns than we have keys for (that means the user
 	// has not expanded a lowest level group, OR we are not grouping at all).
 	return len(r) > len(g)
 }
 
-func (*mySQL) createLimitSQL(r RequestAgGrid) string {
+func (*postgreSQL) createLimitSQL(r RequestAgGrid) string {
 	startRow := r.StartRow
 	endRow := r.EndRow
 	pageSize := endRow - startRow
@@ -250,7 +250,7 @@ func (*mySQL) createLimitSQL(r RequestAgGrid) string {
 }
 
 // GetRowCount for get row count
-func (*mySQL) GetRowCount(r RequestAgGrid, rows []interface{}) int64 {
+func (*postgreSQL) GetRowCount(r RequestAgGrid, rows []interface{}) int64 {
 	rowsLength := len(rows)
 
 	if len(rows) == 0 {
@@ -266,7 +266,7 @@ func (*mySQL) GetRowCount(r RequestAgGrid, rows []interface{}) int64 {
 }
 
 // CutResultsToPageSize func
-func (*mySQL) CutResultsToPageSize(r RequestAgGrid, rows []interface{}) interface{} {
+func (*postgreSQL) CutResultsToPageSize(r RequestAgGrid, rows []interface{}) interface{} {
 	pageSize := r.EndRow - r.StartRow
 	rowsLength := len(rows)
 
@@ -277,5 +277,5 @@ func (*mySQL) CutResultsToPageSize(r RequestAgGrid, rows []interface{}) interfac
 	return rows
 }
 
-// MySQL var
-var MySQL = &mySQL{}
+// PostgreSQL var
+var PostgreSQL = &postgreSQL{}

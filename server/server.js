@@ -34,6 +34,23 @@ app.post('/goOlympicWinnersMySQL', function (req, res) {
      })
 });
 
+app.post('/goOlympicWinnersPostgreSQL', function (req, res) {
+    console.log('---BODY---', req.body)
+    console.log('')
+    fetch('http://localhost:8080/postgre-olympic-winners', {
+        method: 'post',
+        body: JSON.stringify(req.body),
+        headers: {"Content-Type": "application/json; charset=utf-8;"}
+     })
+     .then(httpResponse => httpResponse.json())
+     .then(response => {
+        res.json({rows: response.rows, lastRow: response.lastRow});
+     })
+     .catch(error => {
+         console.error(error);
+     })
+});
+
 app.listen(4000, () => {
     console.log('Started on localhost:4000');
 });

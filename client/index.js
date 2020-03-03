@@ -82,12 +82,11 @@ const datasourceNode = {
     }
 };
 gridOptions.api.setServerSideDatasource(datasourceNode);
-// END API NODE.js
 
-// API Golang
-const gridDivGo = document.querySelector('#myGridGo');
-new Grid(gridDivGo, gridOptions);
-const datasourceGo = {
+// API Golang - DB MySQL
+const gridDivGoMySQL = document.querySelector('#myGridGoMySQL');
+new Grid(gridDivGoMySQL, gridOptions);
+const datasourceGoMySQL = {
     getRows(params) {
         fetch('./goOlympicWinnersMySQL/', {
             method: 'post',
@@ -108,5 +107,30 @@ const datasourceGo = {
         })
     }
 };
-gridOptions.api.setServerSideDatasource(datasourceGo);
-// API Golang
+gridOptions.api.setServerSideDatasource(datasourceGoMySQL);
+
+// API Golang - DB PostgreSQL
+const gridDivGoPostgreSQL = document.querySelector('#myGridGoPostgreSQL');
+new Grid(gridDivGoPostgreSQL, gridOptions);
+const datasourceGoPostgreSQL = {
+    getRows(params) {
+        fetch('./goOlympicWinnersPostgreSQL/', {
+            method: 'post',
+            body: JSON.stringify(params.request),
+            headers: {"Content-Type": "application/json; charset=utf-8"}
+        })
+        .then(httpResponse => httpResponse.json())
+        .then(response => {
+            if (response.rows && response.rows.length > 0) {
+                params.successCallback(response.rows, response.lastRow);
+            } else {
+                params.successCallback([], 0);
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            params.failCallback();
+        })
+    }
+};
+gridOptions.api.setServerSideDatasource(datasourceGoPostgreSQL);

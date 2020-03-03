@@ -8,6 +8,8 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/howeyc/fsnotify v0.9.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0
+	github.com/joho/godotenv v1.3.0
+	github.com/lib/pq v1.0.0
 	golang.org/x/lint v0.0.0-20200130185559-910be7a94367 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/grpc v1.27.1 // indirect

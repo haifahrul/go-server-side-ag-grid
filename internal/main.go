@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/haifahrul/go-server-side-ag-grid/builder"
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 // Model struct
@@ -34,10 +37,55 @@ type ResponseAgGrid struct {
 }
 
 // DBConn connection
-var db *sqlx.DB
+var dbMysql *sqlx.DB
+var dbPgsql *sqlx.DB
 
 func main() {
-	http.HandleFunc("/mysql-olympic-winners", List) // Query For SQL
+	var err error
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	var (
+		mysqlHost     = os.Getenv("MYSQL_HOST")
+		mysqlPort     = os.Getenv("MYSQL_PORT")
+		mysqlUser     = os.Getenv("MYSQL_USER")
+		mysqlPassword = os.Getenv("MYSQL_PASSWORD")
+		mysqlDbname   = os.Getenv("MYSQL_DBNAME")
+	)
+	connStr := fmt.Sprintf(
+		"%s:%s@(%s:%s)/%s",
+		mysqlUser, mysqlPassword, mysqlHost, mysqlPort, mysqlDbname,
+	)
+	dbMysql, err = ConnectMySqlx(connStr)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	defer dbMysql.Close()
+
+	var (
+		pgHost     = os.Getenv("PG_HOST")
+		pgPort     = os.Getenv("PG_PORT")
+		pgUser     = os.Getenv("PG_USER")
+		pgPassword = os.Getenv("PG_PASSWORD")
+		pgDbname   = os.Getenv("PG_DBNAME")
+		pgSslmode  = os.Getenv("PG_SSLMODE")
+	)
+	connPgStr := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		pgUser, pgPassword, pgHost, pgPort, pgDbname, pgSslmode,
+	)
+	dbPgsql, err = ConnectPgSqlx(connPgStr)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	defer dbPgsql.Close()
+
+	http.HandleFunc("/mysql-olympic-winners", ListMySQL)         // Query For MySQL
+	http.HandleFunc("/postgre-olympic-winners", ListViaPostgres) // Query For PostgresSQL
 
 	// TODO: using query Mongo
 	// http.HandleFunc("/mongo-olympic-winners", ListMongo) // Query For Mongo
@@ -46,9 +94,9 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
-// ConnectSqlx connection
-func ConnectSqlx() (*sqlx.DB, error) {
-	db, err := sqlx.Connect("mysql", "guest:guest@(127.0.0.1:3306)/sample_data")
+// ConnectMySqlx connection
+func ConnectMySqlx(c string) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("mysql", c)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err
@@ -56,8 +104,18 @@ func ConnectSqlx() (*sqlx.DB, error) {
 	return db, nil
 }
 
-// List with method post
-func List(w http.ResponseWriter, r *http.Request) {
+// ConnectPgSqlx connection
+func ConnectPgSqlx(c string) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("postgres", c)
+	if err != nil {
+		log.Println(err.Error())
+		return nil, err
+	}
+	return db, nil
+}
+
+// ListMySQL with method post
+func ListMySQL(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		var rows []Model
 		var err error
@@ -69,22 +127,67 @@ func List(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		db, err = ConnectSqlx()
-		if err != nil {
-			log.Println(err.Error())
-			return
-		}
-		defer db.Close()
-
 		w.Header().Set("Content-Type", "application/json")
 
 		// buildSQL
 		SQL := builder.MySQL.BuildQuery(req, "olympic_winners")
-		log.Println("\n\n------ START QUERY BUILDER -----")
-		log.Println(SQL)
-		log.Println("======= END QUERY BUILDER ======")
+		// log.Println("\n\n------ START QUERY BUILDER -----")
+		// log.Println(SQL)
+		// log.Println("======= END QUERY BUILDER ======")
 
-		err = db.Select(&rows, SQL)
+		err = dbMysql.Select(&rows, SQL)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// rowCount := builder.MySQL.GetRowCount(req, rw)
+		// log.Println("rowCount : ", rowCount)
+		// resultsForPage := builder.MySQL.CutResultsToPageSize(req, rows)
+		// log.Println(resultsForPage)
+
+		response := ResponseAgGrid{
+			LastRow: 100,
+			Rows:    rows,
+		}
+
+		result, err := json.Marshal(response)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(result)
+		return
+	}
+
+	http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+}
+
+// ListViaPostgres with method post
+func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		var rows []Model
+		var err error
+		var req builder.RequestAgGrid
+
+		err = json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+
+		// buildSQL
+		SQL := builder.MySQL.BuildQuery(req, `"public"."olympic_winners"`)
+		log.Println("\n\n======= POSTGRE SQL =======")
+		log.Println(SQL)
+		log.Println("======= END POSTGRE SQL ======")
+
+		err = dbPgsql.Select(&rows, SQL)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
