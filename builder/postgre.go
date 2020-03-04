@@ -33,10 +33,10 @@ func (*postgreSQL) createSelectSQL(r RequestAgGrid) string {
 		groupKeysLength := len(groupKeys)
 		rowGroupCol := rowGroupCols[groupKeysLength]
 		colsToSelect := make([]interface{}, 0)
-		colsToSelect = append(colsToSelect, rowGroupCol.Field)
+		colsToSelect = append(colsToSelect, fmt.Sprintf(`"%s"`, rowGroupCol.Field))
 
 		for _, v := range valueCols {
-			s := fmt.Sprintf(`%s(%s) AS %s`, v.AggFunc, v.Field, v.Field)
+			s := fmt.Sprintf(`%s("%s") AS "%s"`, v.AggFunc, v.Field, v.Field)
 			colsToSelect = append(colsToSelect, s)
 		}
 
