@@ -217,7 +217,7 @@ func (*postgreSQL) createOrderBySQL(r RequestAgGrid) string {
 			if grouping && groupColIdsIndexOf < 0 {
 				// ignore
 			} else {
-				part := fmt.Sprintf("%s %s", v["colId"], v["sort"])
+				part := fmt.Sprintf(`"%s" %s`, v["colId"], v["sort"])
 				sortParts = append(sortParts, part)
 			}
 		}
