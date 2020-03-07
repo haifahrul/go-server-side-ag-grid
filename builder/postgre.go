@@ -314,5 +314,49 @@ func (*postgreSQL) Insert(schema string, table string, returning string, modelDB
 	return
 }
 
+// Update returns the `query` and `values` of data
+//
+// Input
+// - schema is a name of schema postgre
+// - table
+// - returning, return of data after successfuly updated. NOTE: if string `""` then `returning` not be apply
+// - modelDB is slice string from your field on table. You should define `modelDB`, in variable. So that can be reusable
+// - modelStruct is unmarshalling from your struct
+//
+// UpdateCondition is a struct for condition update
+func (*postgreSQL) Update(schema string, table string, returning string, uc UpdateCondition, modelDB []string, modelStruct map[string]interface{}) (query string, values []interface{}) {
+	fields := []string{}
+	valuesPtrs := []string{}
+	update := fmt.Sprintf(`UPDATE "%s"."%s" SET`, schema, table)
+
+	if returning != "" {
+		returning = fmt.Sprintf(`RETURNING %s`, returning)
+	}
+
+	i := 1
+	for _, k := range modelDB {
+		a := modelStruct[k]
+		if a == nil {
+			continue
+		}
+
+		f := fmt.Sprintf(`"%s"=$%v`, k, i)
+		fields = append(fields, f)
+
+		v := fmt.Sprintf(`$%v`, i)
+		valuesPtrs = append(valuesPtrs, v)
+
+		values = append(values, a)
+		i++
+	}
+
+	values = append(values, uc.Value)
+
+	where := fmt.Sprintf(`WHERE "%s"=$%v`, uc.Field, i)
+	query = fmt.Sprintf("%s %s %s", update, strings.Join(fields, ", "), where)
+	query = fmt.Sprintf("%s %s", query, returning)
+	return
+}
+
 // PostgreSQL var
 var PostgreSQL = &postgreSQL{}
