@@ -7,7 +7,9 @@ import (
 )
 
 // postgreSQL struct
-type postgreSQL struct{}
+type postgreSQL struct {
+	uc updateCondition
+}
 
 // BuildQuery for build query
 func (*postgreSQL) BuildQuery(r RequestAgGrid, table string) string {
@@ -314,6 +316,11 @@ func (*postgreSQL) Insert(schema string, table string, returning string, modelDB
 	return
 }
 
+type updateCondition struct {
+	Field string
+	Value interface{}
+}
+
 // Update returns the `query` and `values` of data
 //
 // Input
@@ -324,7 +331,7 @@ func (*postgreSQL) Insert(schema string, table string, returning string, modelDB
 // - modelStruct is unmarshalling from your struct
 //
 // UpdateCondition is a struct for condition update
-func (*postgreSQL) Update(schema string, table string, returning string, uc UpdateCondition, modelDB []string, modelStruct map[string]interface{}) (query string, values []interface{}) {
+func (*postgreSQL) Update(schema string, table string, returning string, uc updateCondition, modelDB []string, modelStruct map[string]interface{}) (query string, values []interface{}) {
 	fields := []string{}
 	valuesPtrs := []string{}
 	update := fmt.Sprintf(`UPDATE "%s"."%s" SET`, schema, table)
