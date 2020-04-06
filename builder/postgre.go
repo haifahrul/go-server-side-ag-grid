@@ -98,7 +98,7 @@ func (*postgreSQL) createTextFilterSQL(key string, item map[string]interface{}) 
 	}
 }
 
-func (*postgreSQL) `createNumberFilterSQL`(key string, item map[string]interface{}) string {
+func (*postgreSQL) createNumberFilterSQL(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
 		return fmt.Sprintf(`"%s" = %v`, key, item["filter"])

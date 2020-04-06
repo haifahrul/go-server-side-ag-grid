@@ -182,7 +182,7 @@ func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		// buildSQL
-		SQL := builder.PostgreSQL.BuildQuery(req, `"public"."olympic_winners"`)
+		SQL := builder.PostgreSQL.Select(req, `"public"."olympic_winners"`)
 		log.Println("\n\n======= POSTGRE SQL =======")
 		log.Println(SQL)
 		log.Println("======= END POSTGRE SQL ======")
