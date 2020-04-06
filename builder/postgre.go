@@ -69,17 +69,17 @@ func (*postgreSQL) createFilterSQL(key string, item map[string]interface{}) stri
 func (*postgreSQL) createTextFilterSQL(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
-		return fmt.Sprintf(`lower("%s") = '%s'`, key, item["filter"])
+		return fmt.Sprintf(`lower("%s") = trim(lower('%s'))`, key, item["filter"])
 	case "notEqual":
-		return fmt.Sprintf(`lower("%s") != '%s'`, key, item["filter"])
+		return fmt.Sprintf(`lower("%s") != trim(lower('%s'))`, key, item["filter"])
 	case "contains":
-		return fmt.Sprintf(`lower("%s") LIKE '%s%s%s'`, key, "%", item["filter"], "%")
+		return fmt.Sprintf(`lower("%s") LIKE '%s' || trim(lower('%s')) || '%s'`, key, "%", item["filter"], "%")
 	case "notContains":
-		return fmt.Sprintf(`lower("%s") NOT LIKE '%s%s%s'`, key, "%", item["filter"], "%")
+		return fmt.Sprintf(`lower("%s") NOT LIKE '%s' || trim(lower('%s')) || '%s'`, key, "%", item["filter"], "%")
 	case "startsWith":
-		return fmt.Sprintf(`lower("%s") LIKE '%s%s'`, key, item["filter"], "%")
+		return fmt.Sprintf(`lower("%s") LIKE trim(lower('%s')) || '%s'`, key, item["filter"], "%")
 	case "endsWith":
-		return fmt.Sprintf(`lower("%s") LIKE '%s%s'`, key, "%", item["filter"])
+		return fmt.Sprintf(`lower("%s") LIKE '%s' || trim(lower('%s'))`, key, "%", item["filter"])
 	default:
 		log.Println("unknown text filter type: ", item["type"])
 		return "true"
