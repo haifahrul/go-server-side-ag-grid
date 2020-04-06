@@ -8,11 +8,19 @@ import (
 
 // postgreSQL struct
 type postgreSQL struct {
-	uc updateCondition
+	UpdateCondition updateCondition
 }
 
-// BuildQuery for build query
-func (*postgreSQL) BuildQuery(r RequestAgGrid, table string) string {
+// Catch is func to handle panic
+func (*postgreSQL) Catch() {
+	if r := recover(); r != nil {
+		log.Println("Error occured:", r)
+	}
+}
+
+// Select for build query
+func (*postgreSQL) Select(r RequestAgGrid, table string) string {
+	defer PostgreSQL.Catch()
 	selectSQL := PostgreSQL.createSelectSQL(r)
 	fromSQL := fmt.Sprintf("FROM %s ", table)
 	whereSQL := PostgreSQL.createWhereSQL(r)
@@ -60,6 +68,10 @@ func (*postgreSQL) createFilterSQL(key string, item map[string]interface{}) stri
 		return PostgreSQL.createTextFilterSQL(key, item)
 	case "number":
 		return PostgreSQL.createNumberFilterSQL(key, item)
+	// TODO: case "date":
+	// 	return PostgreSQL.createDateFilterSQL(key, item)
+	// TODO: case "set":
+	// 	return PostgreSQL.createSetFilterSQL(key, item)
 	default:
 		log.Println("unkonwn filter type: ", item["filterType"])
 		return ""
@@ -69,39 +81,39 @@ func (*postgreSQL) createFilterSQL(key string, item map[string]interface{}) stri
 func (*postgreSQL) createTextFilterSQL(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
-		return fmt.Sprintf(`lower("%s") = trim(lower('%s'))`, key, item["filter"])
+		return fmt.Sprintf(`lower("%s"::TEXT) = trim(lower('%s'))`, key, item["filter"])
 	case "notEqual":
-		return fmt.Sprintf(`lower("%s") != trim(lower('%s'))`, key, item["filter"])
+		return fmt.Sprintf(`lower("%s"::TEXT) != trim(lower('%s'))`, key, item["filter"])
 	case "contains":
-		return fmt.Sprintf(`lower("%s") LIKE '%s' || trim(lower('%s')) || '%s'`, key, "%", item["filter"], "%")
+		return fmt.Sprintf(`lower("%s"::TEXT) LIKE '%s' || trim(lower('%s')) || '%s'`, key, "%", item["filter"], "%")
 	case "notContains":
-		return fmt.Sprintf(`lower("%s") NOT LIKE '%s' || trim(lower('%s')) || '%s'`, key, "%", item["filter"], "%")
+		return fmt.Sprintf(`lower("%s"::TEXT) NOT LIKE '%s' || trim(lower('%s')) || '%s'`, key, "%", item["filter"], "%")
 	case "startsWith":
-		return fmt.Sprintf(`lower("%s") LIKE trim(lower('%s')) || '%s'`, key, item["filter"], "%")
+		return fmt.Sprintf(`lower("%s"::TEXT) LIKE trim(lower('%s')) || '%s'`, key, item["filter"], "%")
 	case "endsWith":
-		return fmt.Sprintf(`lower("%s") LIKE '%s' || trim(lower('%s'))`, key, "%", item["filter"])
+		return fmt.Sprintf(`lower("%s"::TEXT) LIKE '%s' || trim(lower('%s'))`, key, "%", item["filter"])
 	default:
 		log.Println("unknown text filter type: ", item["type"])
 		return "true"
 	}
 }
 
-func (*postgreSQL) createNumberFilterSQL(key string, item map[string]interface{}) string {
+func (*postgreSQL) `createNumberFilterSQL`(key string, item map[string]interface{}) string {
 	switch item["type"] {
 	case "equals":
-		return fmt.Sprintf(`%s = %v`, key, item["filter"])
+		return fmt.Sprintf(`"%s" = %v`, key, item["filter"])
 	case "notEqual":
-		return fmt.Sprintf(`%s != %v`, key, item["filter"])
+		return fmt.Sprintf(`"%s" != %v`, key, item["filter"])
 	case "greaterThan":
-		return fmt.Sprintf(`%s > %v`, key, item["filter"])
+		return fmt.Sprintf(`"%s" > %v`, key, item["filter"])
 	case "greaterThanOrEqual":
-		return fmt.Sprintf(`%s >= %v`, key, item["filter"])
+		return fmt.Sprintf(`"%s" >= %v`, key, item["filter"])
 	case "lessThan":
-		return fmt.Sprintf(`%s < %v`, key, item["filter"])
+		return fmt.Sprintf(`"%s" < %v`, key, item["filter"])
 	case "lessThanOrEqual":
-		return fmt.Sprintf(`%s <= %v`, key, item["filter"])
+		return fmt.Sprintf(`"%s" <= %v`, key, item["filter"])
 	case "inRange":
-		return fmt.Sprintf(`(%s >= %v AND %s <= %v)`, key, item["filter"], key, item["filterTo"])
+		return fmt.Sprintf(`("%s" >= %v AND "%s" <= %v)`, key, item["filter"], key, item["filterTo"])
 	default:
 		log.Println("unknown number filter type: ", item["type"])
 		return "true"
@@ -130,7 +142,7 @@ func (*postgreSQL) createWhereSQL(r RequestAgGrid) string {
 			if operator == "AND" || operator == "OR" {
 				partRange := make([]string, 0)
 				for i2, v2 := range inRange {
-					if i2 == "operator" {
+					if i2 == "filterType" || i2 == "operator" {
 						continue
 					}
 
@@ -277,6 +289,12 @@ func (*postgreSQL) CutResultsToPageSize(r RequestAgGrid, rows []interface{}) int
 	}
 	return rows
 }
+
+/**Insert
+	- Input
+   	schema string, table string, returning string, modelDB []string, modelStruct map[string]interface{}
+ 	Output: query string, values []interface{}
+*/
 
 // Insert returns the `query` and `values` of data
 //
