@@ -1,4 +1,7 @@
-
+[<img src="https://img.shields.io/github/issues/haifahrul/go-server-side-ag-grid"/>](https://github.com/haifahrul/go-server-side-ag-grid/issues)
+[<img src="https://img.shields.io/github/forks/haifahrul/go-server-side-ag-grid"/>](https://github.com/haifahrul/go-server-side-ag-grid/network/members)
+![stars](https://img.shields.io/github/stars/haifahrul/go-server-side-ag-grid)
+![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-magenta)
 
 <img src="https://github.com/haifahrul/go-server-side-ag-grid/blob/master/data/sample.png?raw=true" style="height: 200px; width: auto;"/>
 
