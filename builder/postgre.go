@@ -70,6 +70,8 @@ func (*postgreSQL) createFilterSQL(key string, item map[string]interface{}) stri
 		return PostgreSQL.createNumberFilterSQL(key, item)
 	case "date":
 		return PostgreSQL.createDateFilterSQL(key, item)
+	case "dateTime":
+		return PostgreSQL.createDateTimeFilterSQL(key, item)
 	// TODO: case "set":
 	// 	return PostgreSQL.createSetFilterSQL(key, item)
 	default:
@@ -136,6 +138,28 @@ func (*postgreSQL) createDateFilterSQL(key string, item map[string]interface{}) 
 		return fmt.Sprintf(`to_char(%s, 'YYYY-MM-DD') <= '%v'`, key, item["dateFrom"])
 	case "inRange":
 		return fmt.Sprintf(`(to_char(%s, 'YYYY-MM-DD') >= '%v' AND to_char(%s, 'YYYY-MM-DD') <= '%v')`, key, item["dateFrom"], key, item["dateTo"])
+	default:
+		log.Println("unknown date filter type: ", item["type"])
+		return "true"
+	}
+}
+
+func (*postgreSQL) createDateTimeFilterSQL(key string, item map[string]interface{}) string {
+	switch item["type"] {
+	case "equals":
+		return fmt.Sprintf(`%s::TIMESTAMP = '%v'`, key, item["dateFrom"])
+	case "notEqual":
+		return fmt.Sprintf(`%s::TIMESTAMP != '%v'`, key, item["dateFrom"])
+	case "greaterThan":
+		return fmt.Sprintf(`%s::TIMESTAMP > '%v'`, key, item["dateFrom"])
+	case "greaterThanOrEqual":
+		return fmt.Sprintf(`%s::TIMESTAMP >= '%v'`, key, item["dateFrom"])
+	case "lessThan":
+		return fmt.Sprintf(`%s::TIMESTAMP < '%v'`, key, item["dateFrom"])
+	case "lessThanOrEqual":
+		return fmt.Sprintf(`%s::TIMESTAMP <= '%v'`, key, item["dateFrom"])
+	case "inRange":
+		return fmt.Sprintf(`%s::TIMESTAMP BETWEEN %v::TIMESTAMP AND %v::TIMESTAMP`, key, item["dateFrom"], item["dateTo"])
 	default:
 		log.Println("unknown date filter type: ", item["type"])
 		return "true"
