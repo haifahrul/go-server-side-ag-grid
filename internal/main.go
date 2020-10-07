@@ -12,6 +12,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Model struct
@@ -39,6 +41,7 @@ type ResponseAgGrid struct {
 // DBConn connection
 var dbMysql *sqlx.DB
 var dbPgsql *sqlx.DB
+var mongodb *mongo.Database
 
 func main() {
 	var err error
@@ -84,6 +87,17 @@ func main() {
 	}
 	defer dbPgsql.Close()
 
+	var (
+		mongoURL     = os.Getenv("MONGO_URL")
+		dbName     = os.Getenv("MONGO_DATABASE")
+	)
+	mongodb, err = ConnectToMongo(dbName,mongoURL)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	defer mongodb.Close()
+	
 	http.HandleFunc("/mysql-olympic-winners", ListMySQL)         // Query For MySQL
 	http.HandleFunc("/postgre-olympic-winners", ListViaPostgres) // Query For PostgresSQL
 
@@ -111,6 +125,25 @@ func ConnectPgSqlx(c string) (*sqlx.DB, error) {
 		log.Println(err.Error())
 		return nil, err
 	}
+	return db, nil
+}
+
+// ConnectMongoDB connection
+func ConnectToMongo(dbName, mongoURL string) (*mongo.Database, error) {
+	fmt.Println(dbName, mongoURL)
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURL))
+	if err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	err = client.Connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	db := client.Database(dbName)
 	return db, nil
 }
 
