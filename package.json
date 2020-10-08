@@ -35,7 +35,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.2",
     "mysql": "2.16.0",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.1"
   },
   "repository": {
     "type": "git",
