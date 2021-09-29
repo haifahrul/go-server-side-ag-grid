@@ -20,10 +20,13 @@ A reference implementation showing how to perform server-side operations using a
 Reff: for full details see: http://ag-grid.com/nodejs-server-side-operations/
 
 ## Pre requested
+
 - copy file `.env-example` and rename to `.env`
 - setup your credential database such as username, password and etc
+- Install `go get github.com/githubnemo/CompileDaemon`
+- Install `go get golang.org/x/lint/golint`
 
-## Usage
+## How to Use
 
 - Clone the project
 - run `yarn install`
@@ -32,10 +35,6 @@ Reff: for full details see: http://ag-grid.com/nodejs-server-side-operations/
 
 If you want to start the angular and api node.js
 - start with `yarn dev` to run angular & node.js server with nodemon
-
-## GO Pre requested
-- Install `go get github.com/githubnemo/CompileDaemon`
-- Install `go get golang.org/x/lint/golint`
 
 ### Run Go with Makefile
 - `make goget` To run `go get & go mod vendor`
