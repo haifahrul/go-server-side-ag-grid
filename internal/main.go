@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/haifahrul/go-server-side-ag-grid/builder"
@@ -88,16 +90,16 @@ func main() {
 	defer dbPgsql.Close()
 
 	var (
-		mongoURL     = os.Getenv("MONGO_URL")
-		dbName     = os.Getenv("MONGO_DATABASE")
+		mongoURL = os.Getenv("MONGO_URL")
+		dbName   = os.Getenv("MONGO_DATABASE")
 	)
-	mongodb, err = ConnectToMongo(dbName,mongoURL)
+	mongodb, err = ConnectToMongo(dbName, mongoURL)
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
-	defer mongodb.Close()
-	
+	defer mongodb.Client().Disconnect(context.TODO())
+
 	http.HandleFunc("/mysql-olympic-winners", ListMySQL)         // Query For MySQL
 	http.HandleFunc("/postgre-olympic-winners", ListViaPostgres) // Query For PostgresSQL
 
