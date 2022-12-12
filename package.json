@@ -33,7 +33,7 @@
     "ag-grid-community": "^20.0.0",
     "ag-grid-enterprise": "^20.0.0",
     "body-parser": "^1.18.3",
-    "express": "^4.16.2",
+    "express": "^4.17.3",
     "mysql": "2.16.0",
     "node-fetch": "^2.6.1"
   },
