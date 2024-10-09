@@ -208,6 +208,7 @@ func ListMySQL(w http.ResponseWriter, r *http.Request) {
 func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		var rows []Model
+		var rowCount int64
 		var err error
 		var req builder.RequestAgGrid
 
@@ -233,7 +234,7 @@ func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
 		}
 
 		rowsLength := len(rows)
-		rowCount := builder.MySQL.GetRowCount(req, rowsLength)
+		rowCount = builder.PostgreSQL.GetRowCount(req, rowsLength)
 
 		response := ResponseAgGrid{
 			LastRow: rowCount,
