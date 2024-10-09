@@ -37,3 +37,5 @@ If you want to start the angular and api node.js
 ### Run Go with Makefile
 - `go mod tidy`
 - `go run main.go`
+
+The server go will run in port `8080`
