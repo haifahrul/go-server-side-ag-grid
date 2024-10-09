@@ -23,8 +23,6 @@ Reff: for full details see: http://ag-grid.com/nodejs-server-side-operations/
 
 - copy file `.env-example` and rename to `.env`
 - setup your credential database such as username, password and etc
-- Install `go get github.com/githubnemo/CompileDaemon`
-- Install `go get golang.org/x/lint/golint`
 
 ## How to Use
 
@@ -37,5 +35,5 @@ If you want to start the angular and api node.js
 - start with `yarn dev` to run angular & node.js server with nodemon
 
 ### Run Go with Makefile
-- `make goget` To run `go get & go mod vendor`
-- `make gorun` To run `go run main.go`
+- `go mod tidy`
+- `go run main.go`

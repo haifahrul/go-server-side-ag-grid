@@ -20,6 +20,7 @@ import (
 
 // Model struct
 type Model struct {
+	ID            int64   `json:"id"`
 	Description   *string `json:"description"`
 	Athlete       string  `json:"athlete"`
 	Age           int32   `json:"age"`
@@ -43,7 +44,8 @@ type ResponseAgGrid struct {
 // DBConn connection
 var dbMysql *sqlx.DB
 var dbPgsql *sqlx.DB
-var mongodb *mongo.Database
+
+// var mongodb *mongo.Database
 
 func main() {
 	var err error
@@ -89,16 +91,17 @@ func main() {
 	}
 	defer dbPgsql.Close()
 
-	var (
-		mongoURL = os.Getenv("MONGO_URL")
-		dbName   = os.Getenv("MONGO_DATABASE")
-	)
-	mongodb, err = ConnectToMongo(dbName, mongoURL)
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-	defer mongodb.Client().Disconnect(context.TODO())
+	// TODO: Mongo
+	// var (
+	// 	mongoURL = os.Getenv("MONGO_URL")
+	// 	dbName   = os.Getenv("MONGO_DATABASE")
+	// )
+	// mongodb, err = ConnectToMongo(dbName, mongoURL)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return
+	// }
+	// defer mongodb.Client().Disconnect(context.TODO())
 
 	http.HandleFunc("/mysql-olympic-winners", ListMySQL)         // Query For MySQL
 	http.HandleFunc("/postgre-olympic-winners", ListViaPostgres) // Query For PostgresSQL
