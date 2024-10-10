@@ -1,10 +1,24 @@
 import mysql from 'mysql';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'guest',
-    password: 'guest',
-    database: 'sample_data'
+    host: process.env.MYSQL_HOST,
+    port: process.env.MYSQL_PORT,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DBNAME
+});
+
+// Handle connection errors
+connection.connect((err) => {
+    if (err) {
+        console.error('Error connecting to MySQL:', err);
+        return;
+    }
+    console.log('Connected to MySQL');
 });
 
 class OlympicWinnersService {
@@ -18,12 +32,14 @@ class OlympicWinnersService {
             const resultsForPage = this.cutResultsToPageSize(request, results);
 
             resultsCallback(resultsForPage, rowCount);
+
+            console.error('getData error:', error)
         });
     }
 
     buildSql(request) {
         const selectSql = this.createSelectSql(request);
-        const fromSql = ' FROM sample_data.olympic_winners ';
+        const fromSql = ' FROM olympic_winners ';
         const whereSql = this.createWhereSql(request);
         const limitSql = this.createLimitSql(request);
 

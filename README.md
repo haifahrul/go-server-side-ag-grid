@@ -3,7 +3,7 @@
 ![stars](https://img.shields.io/github/stars/haifahrul/go-server-side-ag-grid)
 ![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-magenta)
 
-<img src="https://github.com/haifahrul/go-server-side-ag-grid/blob/master/data/sample.png?raw=true" style="height: 200px; width: auto;"/>
+<img src="https://github.com/haifahrul/go-server-side-ag-grid/blob/main/data/sample.png?raw=true" style="height: 200px; width: auto;"/>
 
 # ag-Grid Server-Side 
 
