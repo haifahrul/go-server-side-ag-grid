@@ -1,10 +1,10 @@
 import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
-import webpackConfig from '../webpack.config.js';
+import webpackConfig from '../../webpack.config.js';
 import express from 'express';
 import bodyParser from 'body-parser';
 import fetch from 'node-fetch'
-import OlympicWinnersService from './nodejs/olympicWinnersService.js';
+import OlympicWinnersService from './olympicWinnersService';
 
 const app = express();
 app.use(webpackMiddleware(webpack(webpackConfig)));

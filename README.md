@@ -8,8 +8,8 @@
 # ag-Grid Server-Side 
 
 - [Ag Grid](https://www.ag-grid.com/)
-- Node.js Example
-- Go Example
+- Node.js Example (Version Node 12)
+- Go Example (Version Go 1.21)
 - MySQL
 - PostgreSQL
 

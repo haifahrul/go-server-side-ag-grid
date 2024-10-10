@@ -1,14 +1,18 @@
 {
-  "name": "ag-grid-server-side-demo",
-  "version": "1.0.0",
-  "description": "A simple demo app showing how to perform server-side operations using ag-Grid with node.js and MySQL.",
+  "name": "go-server-side-ag-grid",
+  "version": "2.0.0",
+  "description": "A simple demo app showing how to perform server-side operations using ag-Grid with node.js and MySQL. Golang with PostgreSQL and MySQL",
+  "repository": {
+    "type": "git",
+    "url": "go-server-side-ag-grid"
+  },
   "main": "index.js",
   "scripts": {
-    "start": "babel-node ./server/server.js",
-    "dev": "nodemon --exec babel-node ./server/server.js"
+    "start": "babel-node ./server/nodejs/server.js",
+    "dev": "nodemon --exec babel-node ./server/nodejs/server.js"
   },
   "keywords": [],
-  "author": "Robert Clarke",
+  "author": "haifahrul",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -36,9 +40,5 @@
     "express": "^4.16.2",
     "mysql": "2.16.0",
     "node-fetch": "^2.6.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "ag-grid-server-side-demo"
   }
 }
