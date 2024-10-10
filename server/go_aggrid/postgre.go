@@ -1,4 +1,4 @@
-package builder
+package go_aggrid
 
 import (
 	"fmt"

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/haifahrul/go-server-side-ag-grid/builder"
+	"github.com/haifahrul/go-server-side-ag-grid/server/go_aggrid"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -157,7 +157,7 @@ func ListMySQL(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		var rows []Model
 		var err error
-		var req builder.RequestAgGrid
+		var req go_aggrid.RequestAgGrid
 
 		err = json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
@@ -168,7 +168,7 @@ func ListMySQL(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		// buildSQL
-		SQL := builder.MySQL.BuildQuery(req, "olympic_winners")
+		SQL := go_aggrid.MySQL.BuildQuery(req, "olympic_winners")
 		// log.Println("\n\n------ START QUERY BUILDER -----")
 		// log.Println(SQL)
 		// log.Println("======= END QUERY BUILDER ======")
@@ -181,8 +181,8 @@ func ListMySQL(w http.ResponseWriter, r *http.Request) {
 		}
 
 		rowsLength := len(rows)
-		rowCount := builder.MySQL.GetRowCount(req, rowsLength)
-		// resultsForPage := builder.MySQL.CutResultsToPageSize(req, rows)
+		rowCount := go_aggrid.MySQL.GetRowCount(req, rowsLength)
+		// resultsForPage := go_aggrid.MySQL.CutResultsToPageSize(req, rows)
 		// log.Println(resultsForPage)
 
 		response := ResponseAgGrid{
@@ -210,7 +210,7 @@ func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
 		var rows []Model
 		var rowCount int64
 		var err error
-		var req builder.RequestAgGrid
+		var req go_aggrid.RequestAgGrid
 
 		err = json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
@@ -221,7 +221,7 @@ func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		// buildSQL
-		SQL := builder.PostgreSQL.Select(req, `"public"."olympic_winners"`)
+		SQL := go_aggrid.PostgreSQL.Select(req, `"public"."olympic_winners"`)
 		log.Println("\n\n======= POSTGRE SQL =======")
 		log.Println(SQL)
 		log.Println("======= END POSTGRE SQL ======")
@@ -234,7 +234,7 @@ func ListViaPostgres(w http.ResponseWriter, r *http.Request) {
 		}
 
 		rowsLength := len(rows)
-		rowCount = builder.PostgreSQL.GetRowCount(req, rowsLength)
+		rowCount = go_aggrid.PostgreSQL.GetRowCount(req, rowsLength)
 
 		response := ResponseAgGrid{
 			LastRow: rowCount,

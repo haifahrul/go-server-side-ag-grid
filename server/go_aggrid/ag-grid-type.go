@@ -1,4 +1,4 @@
-package builder
+package go_aggrid
 
 // ColumnVO struct
 type ColumnVO struct {
